@@ -58,7 +58,7 @@ document.getElementById("btnCloudSave").addEventListener("click", async ()=>{
   const url = document.getElementById("cloudUrl").value.trim();
   const key = document.getElementById("cloudKey").value.trim();
   const profile = document.getElementById("cloudProfile").value.trim() || "default";
-  if(!url){ alert("Укажите URL вашего Apps Script веб‑приложения"); return; }
+  if(!url){ alert("https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgK96xCPlRFf-moyefgESQBfeE5ZreOWteil9b_a8y1CtlOydC0kLGcsOjw-s_o19SONHxDSzUvUm0GHhcHlXKbvkYtIvufrjsm8HI9ui0j2UXZlNXUk-5CYuGZVsnZTKonZI1gQ9EXBZjVJiaRT2Xl4EYjX2386WHNjKxV2qK8ZWvKeeaGsC3HzsS-ARJO3uT4XqmzGBd-pchwW8zPn_UGdKzMjHwtMKEtUtCrk1qH0ECLiReBX2MycsEpbb51KjwmleMwFrjzBormaUcXPewrzu-cJg&lib=M7wu53sZX9s5jImi2mgQDGzmn7Zs-LkXz"); return; }
   localStorage.setItem("tm_cloud_url", url);
   localStorage.setItem("tm_cloud_key", key);
   localStorage.setItem("tm_cloud_profile", profile);
