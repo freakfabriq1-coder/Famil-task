@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Task Manager — Tabler UI (Cloud + Kanban DnD)</title>
+  <title>Task Manager — Tabler UI (Cloud + Kanban DnD) — FIXED</title>
 
   <!-- Tabler CSS & Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
@@ -13,7 +13,8 @@
     .kanban {display:grid; grid-template-columns:repeat(4,1fr); gap:1rem;}
     @media (max-width: 1024px){ .kanban{grid-template-columns:1fr 1fr} }
     @media (max-width: 640px){ .kanban{grid-template-columns:1fr} }
-    .kanban-column {min-height: 240px;}
+    .kanban-column {min-height: 260px;}
+    .kanban-column .list-group{min-height:220px; padding: .5rem;}
     .badge-online{background:#0f2a1c; color:#b8f7ca; border:1px solid #1b6c3d;}
     .badge-offline{background:#2a1111; color:#ffd1d1; border:1px solid #7b1f1f;}
     .ti{vertical-align:-2px}
@@ -37,7 +38,12 @@
     /* Drag & Drop */
     .drop-target{ outline:2px dashed rgba(140,148,255,.35); outline-offset:-6px; }
     .dragging{ opacity:.6 }
-  </style>
+  
+    .modal .form-control, .modal .form-select {
+      height: 42px;
+    }
+
+</style>
 </head>
 <body>
   <div class="page">
@@ -58,24 +64,24 @@
         </div>
 
         <div class="collapse navbar-collapse" id="navbar-menu">
-          <div class="navbar-nav">
-            <div class="nav-item">
-              <a class="nav-link active" data-bs-toggle="tab" href="#tab-table">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a id="link-table" class="nav-link active" data-bs-toggle="tab" href="#tab-table" role="tab" aria-controls="tab-table" aria-selected="true">
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                   <i class="ti ti-table"></i>
                 </span>
                 <span class="nav-link-title">Таблица</span>
               </a>
-            </div>
-            <div class="nav-item">
-              <a class="nav-link" data-bs-toggle="tab" href="#tab-kanban">
+            </li>
+            <li class="nav-item">
+              <a id="link-kanban" class="nav-link" data-bs-toggle="tab" href="#tab-kanban" role="tab" aria-controls="tab-kanban" aria-selected="false">
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                   <i class="ti ti-layout-kanban"></i>
                 </span>
                 <span class="nav-link-title">Канбан</span>
               </a>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       </div>
     </header>
@@ -152,7 +158,7 @@
   </div>
 
   <div class="modal modal-blur fade" id="modalEdit" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width:860px;" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalTitle">Новая задача</h5>
@@ -160,33 +166,57 @@
         </div>
         <div class="modal-body">
           <div class="row g-3">
-            <div class="col-sm-6">
-              <label class="form-label">Название</label>
-              <input id="fmTitle" type="text" class="form-control" />
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label">Ответственный</label>
-              <input id="fmAssignee" type="text" class="form-control" />
-            </div>
-            <div class="col-sm-4">
-              <label class="form-label">Статус</label>
-              <select id="fmStatus" class="form-select"></select>
-            </div>
-            <div class="col-sm-4">
-              <label class="form-label">Приоритет</label>
-              <select id="fmPrio" class="form-select"></select>
-            </div>
-            <div class="col-sm-4">
-              <label class="form-label">Дедлайн</label>
-              <input id="fmDue" type="date" class="form-control" />
-            </div>
             <div class="col-12">
-              <label class="form-label">Теги (через запятую)</label>
-              <input id="fmTags" type="text" class="form-control" />
-            </div>
-            <div class="col-12">
-              <label class="form-label">Описание</label>
-              <textarea id="fmDesc" rows="3" class="form-control"></textarea>
+            <div class="row g-3">
+  <div class="col-sm-6">
+    <label class="form-label">Название</label>
+    <input id="fmTitle" type="text" class="form-control" />
+  </div>
+  <div class="col-sm-6">
+    <label class="form-label">Ответственный</label>
+    <input id="fmAssignee" type="text" class="form-control" />
+  </div>
+</div>
+            <div class="row g-3">
+  <div class="col-sm-4">
+    <label class="form-label">Статус</label>
+    <select id="fmStatus" class="form-select"></select>
+  </div>
+  <div class="col-sm-4">
+    <label class="form-label">Приоритет</label>
+    <select id="fmPrio" class="form-select"></select>
+  </div>
+  <div class="col-sm-4">
+    <label class="form-label">Дедлайн</label>
+    <input id="fmDue" type="date" class="form-control" />
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-12">
+    <label class="form-label">Теги (через запятую)</label>
+    <input id="fmTags" type="text" class="form-control" />
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-12">
+    <label class="form-label">Описание</label>
+    <textarea id="fmDesc" rows="3" class="form-control"></textarea>
+  </div>
+</div>
+          </div>
+            <div class="mt-4">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h3 class="m-0">Комментарии</h3>
+                <span class="badge bg-indigo-lt" id="cmCount">0</span>
+              </div>
+              <div class="card mb-2">
+                <div class="card-body p-2" id="commentsList" style="max-height:30vh; overflow:auto"></div>
+              </div>
+              <div class="row g-2">
+                <div class="col-sm-4"><input id="fmCommentAuthor" type="text" class="form-control form-control-sm" placeholder="Автор (необязательно)" /></div>
+                <div class="col-sm-8"><textarea id="fmCommentText" rows="2" class="form-control" placeholder="Ваш комментарий… (Ctrl+Enter — отправить)"></textarea></div>
+              </div>
+              <button id="btnAddComment" class="btn btn-primary mt-2"><i class="ti ti-message-plus me-1"></i> Добавить комментарий</button>
             </div>
           </div>
         </div>
@@ -202,7 +232,11 @@
   <input type="file" id="fileExcel" accept=".xlsx,.xls" hidden />
   <input type="file" id="fileCSV" accept=".csv" hidden />
 
+  <!-- IMPORTANT: Ensure Bootstrap 5 is present so tabs & modal work and window.bootstrap is defined -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Tabler JS (after Bootstrap bundle) -->
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
+  <!-- XLSX -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
@@ -319,18 +353,19 @@
     const s = (name||"").trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||"").join("");
     return `<span class="avatar-initials" title="${name||''}">${s||"?"}</span>`;
   }
-  function drawTable(){
+  function optionList(val, arr){return arr.map(s=>`<option ${s===val?'selected':''}>${s}</option>`).join("")}
+function drawTable(){
     const tbody = $("#tbody"); tbody.innerHTML = "";
     tasks.filter(passFilters).forEach(t=>{
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${t.ID ?? ""}</td>
         <td class="cursor-pointer text-primary">${escapeHtml(t.Название||"")}</td>
-        <td>${t.Статус||""}</td>
-        <td>${prioChip(t.Приоритет)}</td>
+        <td><select class="form-select form-select-sm" data-inline-status>${optionList(t.Статус||"Новая", STATUS_CHOICES)}</select></td>
+        <td><select class="form-select form-select-sm" data-inline-prio>${optionList(t.Приоритет||"Средний", PRIORITY_CHOICES)}</select></td>
         <td>${initials(t.Ответственный)} <span class="ms-1">${escapeHtml(t.Ответственный||"")}</span></td>
         <td>${t.Дедлайн ? new Date(t.Дедлайн).toLocaleDateString('ru-RU') : ""}</td>
-        <td>${(t.Теги||"").split(",").filter(Boolean).map(s=>`<span class="badge bg-indigo-lt me-1">${escapeHtml(s.trim())}</span>`).join("")}</td>
+        <td>${(t.Теги||"").split(",").filter(Boolean).map(s=>`<span class="badge bg-indigo-lt me-1">${escapeHtml(s.trim())}</span>`).join("")}<span class="badge bg-indigo-lt ms-1">${(t.Комментарии||[]).length||0}</span></td>
         <td class="text-end">
           <button class="btn btn-sm btn-outline-primary me-1" data-edit>Ред.</button>
           <button class="btn btn-sm btn-outline-danger" data-del>Удалить</button>
@@ -338,6 +373,8 @@
       tr.querySelector("[data-edit]").addEventListener("click", ()=>openModal(t.ID));
       tr.querySelector("[data-del]").addEventListener("click", ()=>{ if(confirm("Удалить?")){ tasks = tasks.filter(x=>x.ID!==t.ID); cloudSave(); drawTable(); drawKanban(); }});
       tr.children[1].addEventListener("click", ()=>openModal(t.ID));
+      tr.querySelector("[data-inline-status]").addEventListener("change", (e)=>{ const v=e.target.value; const i=tasks.findIndex(x=>x.ID===t.ID); if(i>=0){ tasks[i].Статус=v; tasks[i].Обновлено=new Date().toISOString(); cloudSave(); drawKanban(); }});
+      tr.querySelector("[data-inline-prio]").addEventListener("change", (e)=>{ const v=e.target.value; const i=tasks.findIndex(x=>x.ID===t.ID); if(i>=0){ tasks[i].Приоритет=v; tasks[i].Обновлено=new Date().toISOString(); cloudSave(); drawKanban(); }});
       tbody.appendChild(tr);
     });
   }
@@ -355,8 +392,13 @@
       col.className = "card kanban-column";
       col.innerHTML = `
         <div class="card-header"><h3 class="card-title">${g.name}</h3></div>
-        <div class="list-group list-group-flush" data-col="${g.name}" ondragover="event.preventDefault()" ondragenter="kanbanEnter(this)" ondragleave="kanbanLeave(this)" ondrop="kanbanDrop(this)"></div>`;
+        <div class="list-group list-group-flush" data-col="${g.name}"></div>`;
       const list = col.querySelector(".list-group");
+      // Allow drop
+      list.addEventListener("dragover", (e)=>{ e.preventDefault(); if(e.dataTransfer){ e.dataTransfer.dropEffect = "move"; } list.classList.add("drop-target"); });
+      list.addEventListener("dragleave", ()=>{ list.classList.remove("drop-target"); });
+      list.addEventListener("drop", (e)=>{ e.preventDefault(); list.classList.remove("drop-target"); kanbanDrop(list, e); });
+
       g.items.forEach(t=>{
         const item = document.createElement("div");
         item.className = "list-group-item";
@@ -371,6 +413,7 @@
             </div>
             <div class="col-auto">
               ${prioChip(t.Приоритет)}
+              <span class="badge bg-indigo-lt ms-2">${(t.Комментарии||[]).length||0}</span>
               <button class="btn btn-sm btn-outline ms-2" data-edit><i class="ti ti-pencil"></i></button>
             </div>
           </div>`;
@@ -388,23 +431,83 @@
     dragId = e.currentTarget.dataset.id;
     e.currentTarget.classList.add("dragging");
     e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", dragId); } catch(_){}
   }
   function kanbanDragEnd(e){
     e.currentTarget.classList.remove("dragging");
     dragId = null;
   }
-  window.kanbanEnter = function(list){ list.classList.add("drop-target"); }
-  window.kanbanLeave = function(list){ list.classList.remove("drop-target"); }
-  window.kanbanDrop = function(list){
-    list.classList.remove("drop-target");
-    if(!dragId) return;
+  function kanbanDrop(list, e){
+    let id = dragId;
+    try{ const d = e?.dataTransfer?.getData("text/plain"); if(d) id=d; }catch(_){ }
+    if(!id) return;
     const status = list.getAttribute("data-col");
-    const idx = tasks.findIndex(t=>String(t.ID)===String(dragId));
+    const idx = tasks.findIndex(t=>String(t.ID)===String(id));
     if(idx>=0){
       tasks[idx].Статус = status;
       tasks[idx].Обновлено = new Date().toISOString();
       cloudSave(); drawKanban(); drawTable();
     }
+  }
+
+  // ====== Comments ======
+  function getTaskById(id){ return tasks.find(x=>String(x.ID)===String(id)); }
+
+  function ensureComments(task){
+    if(!task.Комментарии) task.Комментарии = [];
+    return task.Комментарии;
+  }
+
+  function renderComments(id){
+    const task = getTaskById(id);
+    const list = document.getElementById("commentsList");
+    const cnt  = document.getElementById("cmCount");
+    if(!task){ list.innerHTML = '<div class="text-secondary">Задача не найдена</div>'; cnt.textContent='0'; return; }
+    const comments = ensureComments(task);
+    cnt.textContent = comments.length;
+    if(!comments.length){ list.innerHTML = '<div class="text-secondary">Пока нет комментариев</div>'; return; }
+    list.innerHTML = comments.map(c=>{
+      const init = (c.author||"?").trim().slice(0,2).toUpperCase() || "?";
+      const t = new Date(c.time||Date.now());
+      const when = isNaN(+t) ? "" : t.toLocaleString('ru-RU');
+      return `
+        <div class="list-group list-group-flush mb-2">
+          <div class="list-group-item">
+            <div class="row align-items-center">
+              <div class="col-auto"><span class="avatar-initials" title="${escapeHtml(c.author||'')}">${init}</span></div>
+              <div class="col">
+                <div class="strong">${escapeHtml(c.author||'')}</div>
+                <div class="text-secondary small">${escapeHtml(when)}</div>
+              </div>
+              <div class="col-auto">
+                <button class="btn btn-sm btn-outline-danger" data-del-cm="${c.id}"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>
+            <div class="mt-2">${escapeHtml(c.text||'')}</div>
+          </div>
+        </div>`;
+    }).join("");
+
+    // attach delete listeners
+    list.querySelectorAll("[data-del-cm]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const cid = btn.getAttribute("data-del-cm");
+        const t = getTaskById(id); if(!t) return;
+        t.Комментарии = (t.Комментарии||[]).filter(x=>String(x.id)!==String(cid));
+        t.Обновлено = new Date().toISOString();
+        cloudSave(); renderComments(id);
+      });
+    });
+  }
+
+  function addCommentToTask(id, author, text){
+    const t = getTaskById(id); if(!t) return;
+    const cm = ensureComments(t);
+    const newItem = { id: (cm.length? Math.max(...cm.map(x=>Number(x.id)||0))+1 : 1), author: (author||'').trim() || '', text: (text||'').trim(), time: new Date().toISOString() };
+    if(!newItem.text) return alert("Введите текст комментария");
+    cm.push(newItem);
+    t.Обновлено = new Date().toISOString();
+    cloudSave(); renderComments(id);
   }
 
   // ====== Modal ======
@@ -426,9 +529,15 @@
       $("#fmTags").value = t.Теги||"";
       $("#fmDesc").value = t.Описание||"";
     }
+    document.getElementById("fmCommentAuthor").value = $("#fmAssignee").value || "";
+    renderComments(id ?? editingId);
 
-    const modal = new bootstrap.Modal(document.getElementById("modalEdit"));
-    modal.show();
+    if (window.bootstrap?.Modal) {
+      const modal = new bootstrap.Modal(document.getElementById("modalEdit"));
+      modal.show();
+    } else {
+      alert("Bootstrap не загружен. Проверьте соединение.");
+    }
   }
 
   document.getElementById("btnSave").addEventListener("click", ()=>{
@@ -453,14 +562,28 @@
       tasks.push({...payload, Создано: now });
     }
     cloudSave(); drawTable(); drawKanban();
-    bootstrap.Modal.getInstance(document.getElementById("modalEdit")).hide();
+    const inst = bootstrap.Modal.getInstance(document.getElementById("modalEdit"));
+    if (inst) inst.hide();
   });
 
-  document.getElementById("btnDelete").addEventListener("click", ()=>{
+  
+  // Comment add + shortcuts
+  document.getElementById("btnAddComment").addEventListener("click", ()=>{
+    addCommentToTask(editingId, document.getElementById("fmCommentAuthor").value, document.getElementById("fmCommentText").value);
+    document.getElementById("fmCommentText").value="";
+  });
+  document.getElementById("fmCommentText").addEventListener("keydown", (e)=>{
+    if(e.key==='Enter' && (e.ctrlKey || e.metaKey)){
+      e.preventDefault();
+      document.getElementById("btnAddComment").click();
+    }
+  });
+document.getElementById("btnDelete").addEventListener("click", ()=>{
     if(editingId && confirm("Удалить задачу?")){
       tasks = tasks.filter(x=>x.ID!==editingId);
       cloudSave(); drawTable(); drawKanban();
-      bootstrap.Modal.getInstance(document.getElementById("modalEdit")).hide();
+      const inst = bootstrap.Modal.getInstance(document.getElementById("modalEdit"));
+      if (inst) inst.hide();
     }
   });
 
@@ -482,16 +605,24 @@
 
   document.getElementById("fileExcel").addEventListener("change", async (e)=>{
     const f=e.target.files[0]; if(!f) return;
-    const buf=await f.arrayBuffer(); const wb=XLSX.read(buf,{type:"array"}); const sh=wb.Sheets[wb.SheetNames[0]];
-    const json=XLSX.utils.sheet_to_json(sh,{defval:""});
-    tasks = json.map(fromRowImport); drawTable(); drawKanban(); cloudSave(); e.target.value="";
+    try{
+      const buf=await f.arrayBuffer(); const wb=XLSX.read(buf,{type:"array"}); const sh=wb.Sheets[wb.SheetNames[0]];
+      const json=XLSX.utils.sheet_to_json(sh,{defval:""});
+      tasks = json.map(fromRowImport); drawTable(); drawKanban(); cloudSave();
+    }catch(err){ alert("Не удалось импортировать Excel: "+err.message); }
+    e.target.value="";
   });
 
   document.getElementById("fileCSV").addEventListener("change", async (e)=>{
     const f=e.target.files[0]; if(!f) return;
-    const txt = await f.text(); const rows = XLSX.read(txt,{type:"string"}); const sh = rows.Sheets[rows.SheetNames[0]];
-    const json=XLSX.utils.sheet_to_json(sh,{defval:""});
-    tasks = json.map(fromRowImport); drawTable(); drawKanban(); cloudSave(); e.target.value="";
+    try{
+      const txt = await f.text();
+      const wb = XLSX.read(txt,{type:"string", raw:true});
+      const sh = wb.Sheets[wb.SheetNames[0]];
+      const json=XLSX.utils.sheet_to_json(sh,{defval:""});
+      tasks = json.map(fromRowImport); drawTable(); drawKanban(); cloudSave();
+    }catch(err){ alert("Не удалось импортировать CSV: "+err.message); }
+    e.target.value="";
   });
 
   function toRowExport(t){
@@ -521,6 +652,18 @@
   document.getElementById("btnSaveLocal").addEventListener("click", ()=>{ localStorage.setItem("tm_tasks", JSON.stringify(tasks)); });
   document.getElementById("btnLoadLocal").addEventListener("click", ()=>{ const raw=localStorage.getItem("tm_tasks"); if(raw){ tasks=JSON.parse(raw); drawTable(); drawKanban(); }});
   document.getElementById("btnClearAll").addEventListener("click", ()=>{ if(confirm("Очистить все?")){ tasks=[]; drawTable(); drawKanban(); cloudSave(); }});
+
+  // Simple programmatic tabs (in case data-bs-toggle fails inside navbar)
+  function activateTab(targetId){
+    document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active","show"));
+    document.querySelectorAll(".navbar .nav-link").forEach(a=>a.classList.remove("active"));
+    const pane = document.querySelector(targetId);
+    if(pane){ pane.classList.add("active","show"); }
+    const link = document.querySelector(`.navbar .nav-link[href="${targetId}"]`);
+    if(link){ link.classList.add("active"); }
+  }
+  document.getElementById("link-table").addEventListener("click", (e)=>{ e.preventDefault(); activateTab("#tab-table"); });
+  document.getElementById("link-kanban").addEventListener("click", (e)=>{ e.preventDefault(); activateTab("#tab-kanban"); });
 
   function nextId(){ const ids=tasks.map(x=>Number(x.ID)||0); const m = ids.length?Math.max(...ids):0; return m+1; }
   function isoToYMD(iso){ if(!iso) return ""; const d=new Date(iso); if(isNaN(+d)) return ""; return d.toISOString().slice(0,10); }
