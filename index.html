@@ -1,476 +1,1289 @@
 <!DOCTYPE html>
-<html lang="ru" data-bs-theme="dark">
+<html lang="ru" data-bs-theme="dark" data-theme="dark-fun">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Task Manager — Tabler UI (Cloud + Kanban DnD) — FIXED</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Manager — Tabler UI (Cloud + Kanban DnD) — FIXED</title>
 
-  <!-- Tabler CSS & Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <style>
-    body{background: radial-gradient(1200px 900px at 0% -20%, rgba(122,66,255,.15), transparent 60%), #0b0d13;}
-    .kanban {display:grid; grid-template-columns:repeat(4,1fr); gap:1rem;}
-    @media (max-width: 1024px){ .kanban{grid-template-columns:1fr 1fr} }
-    @media (max-width: 640px){ .kanban{grid-template-columns:1fr} }
-    .kanban-column {min-height: 260px;}
-    .kanban-column .list-group{min-height:220px; padding: .5rem;}
-    .badge-online{background:#0f2a1c; color:#b8f7ca; border:1px solid #1b6c3d;}
-    .badge-offline{background:#2a1111; color:#ffd1d1; border:1px solid #7b1f1f;}
-    .ti{vertical-align:-2px}
-    .cursor-pointer{cursor:pointer}
+    <!-- Tabler CSS & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        body {
+            background: radial-gradient(1200px 900px at 0% -20%, rgba(122, 66, 255, .15), transparent 60%), #0b0d13;
+        }
 
-    /* Priority chips */
-    .prio-chip{border-radius:999px; padding:.25rem .5rem; font-size:.75rem}
-    .prio-low{background:#1b3b2a; color:#b9f6ca; border:1px solid #1e6b45}
-    .prio-med{background:#263050; color:#d1e1ff; border:1px solid #2f4782}
-    .prio-high{background:#4b2b2b; color:#ffd1d1; border:1px solid #7b2f2f}
-    .prio-crit{background:#5a120f; color:#ffdad9; border:1px solid #a52a2a}
+        .kanban {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
 
-    /* Avatar (initials) */
-    .avatar-initials{
-      width:28px; height:28px; border-radius:50%;
-      display:inline-flex; align-items:center; justify-content:center;
-      font-size:.75rem; font-weight:700;
-      background:linear-gradient(180deg,#7a42ff,#513ae7); color:#fff;
-    }
+        @media (max-width: 1024px) {
+            .kanban {
+                grid-template-columns: 1fr 1fr
+            }
+        }
 
-    /* Drag & Drop */
-    .drop-target{ outline:2px dashed rgba(140,148,255,.35); outline-offset:-6px; }
-    .dragging{ opacity:.6 }
-  
-    .modal .form-control, .modal .form-select {
-      height: 42px;
-    }
+        @media (max-width: 640px) {
+            .kanban {
+                grid-template-columns: 1fr
+            }
+        }
 
-</style>
+        .kanban-column {
+            min-height: 260px;
+        }
+
+        .kanban-column .list-group {
+            min-height: 220px;
+            padding: .5rem;
+        }
+
+        .badge-online {
+            background: #0f2a1c;
+            color: #b8f7ca;
+            border: 1px solid #1b6c3d;
+        }
+
+        .badge-offline {
+            background: #2a1111;
+            color: #ffd1d1;
+            border: 1px solid #7b1f1f;
+        }
+
+        .ti {
+            vertical-align: -2px
+        }
+
+        .cursor-pointer {
+            cursor: pointer
+        }
+
+        /* Priority chips */
+        .prio-chip {
+            border-radius: 999px;
+            padding: .25rem .5rem;
+            font-size: .75rem
+        }
+
+        .prio-low {
+            background: #1b3b2a;
+            color: #b9f6ca;
+            border: 1px solid #1e6b45
+        }
+
+        .prio-med {
+            background: #263050;
+            color: #d1e1ff;
+            border: 1px solid #2f4782
+        }
+
+        .prio-high {
+            background: #4b2b2b;
+            color: #ffd1d1;
+            border: 1px solid #7b2f2f
+        }
+
+        .prio-crit {
+            background: #5a120f;
+            color: #ffdad9;
+            border: 1px solid #a52a2a
+        }
+
+        /* Avatar (initials) */
+        .avatar-initials {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
+            font-weight: 700;
+            background: linear-gradient(180deg, #7a42ff, #513ae7);
+            color: #fff;
+        }
+
+        /* Drag & Drop */
+        .drop-target {
+            outline: 2px dashed rgba(140, 148, 255, .35);
+            outline-offset: -6px;
+        }
+
+        .dragging {
+            opacity: .6
+        }
+
+        .modal .form-control,
+        .modal .form-select {
+            height: 42px;
+        }
+
+
+        /* --- Fun Theme Enhancements --- */
+        :root {
+            --bg1: #0b0d13;
+            --bg2: #101525;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-brd: rgba(255, 255, 255, 0.08);
+            --glow: 0 10px 30px rgba(122, 66, 255, .15);
+        }
+
+        body {
+            background:
+                radial-gradient(1200px 800px at 10% -10%, rgba(122, 66, 255, .15), transparent 60%),
+                radial-gradient(800px 600px at 100% 0%, rgba(226, 17, 113, .12), transparent 50%),
+                linear-gradient(180deg, var(--bg1), var(--bg2));
+        }
+
+        .card,
+        .modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-brd);
+            box-shadow: var(--glow);
+        }
+
+        .navbar {
+            background: linear-gradient(180deg, rgba(0, 0, 0, .5), rgba(0, 0, 0, .1));
+            border-bottom: 1px solid var(--glass-brd);
+        }
+
+        .badge-online {
+            background: #0e3826;
+            color: #b8f7ca;
+            border: 1px solid #1b6c3d;
+        }
+
+        .badge-offline {
+            background: #3a151a;
+            color: #ffd1d1;
+            border: 1px solid #7b1f1f;
+        }
+
+        /* Kanban headers with emojis */
+        .kanban .card-header {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px dashed var(--glass-brd)
+        }
+
+        .kanban .card-title {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+        }
+
+        .k-emoji {
+            font-size: 1.1rem;
+            opacity: .85
+        }
+
+        /* Hover lift */
+        .list-group-item {
+            transition: transform .15s ease, box-shadow .15s ease;
+            border-radius: .75rem;
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .25);
+        }
+
+        /* Priority chips brighter + animations */
+        .prio-low {
+            background: #123b26;
+            color: #a7ffd0;
+            border: 1px solid #1e6b45
+        }
+
+        .prio-med {
+            background: #1b2e5a;
+            color: #d6e4ff;
+            border: 1px solid #2f4782
+        }
+
+        .prio-high {
+            background: #5a2b2b;
+            color: #ffd6d6;
+            border: 1px solid #a04040
+        }
+
+        .prio-crit {
+            background: #7b1010;
+            color: #ffe6e6;
+            border: 1px solid #ff4d4d;
+            animation: pulse 1.6s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 77, 77, .4)
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 77, 77, 0)
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 77, 77, 0)
+            }
+        }
+
+        /* Inputs uniform height & focus glow */
+        .modal .form-control,
+        .modal .form-select {
+            height: 44px;
+        }
+
+        .modal .form-control:focus,
+        .modal .form-select:focus {
+            border-color: #7a42ff;
+            box-shadow: 0 0 0 .2rem rgba(122, 66, 255, .25);
+        }
+
+        /* Fun buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #7a42ff, #e21171);
+            border: none
+        }
+
+        .btn-outline {
+            border-color: var(--glass-brd);
+            color: #dbe0ff
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, .08)
+        }
+
+        /* Comment list spacing */
+        #commentsList .list-group-item {
+            background: rgba(0, 0, 0, .15)
+        }
+
+
+        /* --- Light theme high-contrast --- */
+        :root[data-theme="light-fun"] {
+            --bg1: #f6f7fb;
+            --bg2: #eef1f7;
+            --glass: rgba(255, 255, 255, 0.9);
+            --glass-brd: rgba(10, 20, 40, 0.08);
+            --glow: 0 6px 24px rgba(122, 66, 255, .12);
+        }
+
+        :root[data-theme="light-fun"] body {
+            background:
+                radial-gradient(900px 700px at 10% -10%, rgba(122, 66, 255, .10), transparent 60%),
+                radial-gradient(600px 500px at 100% 0%, rgba(226, 17, 113, .08), transparent 50%),
+                linear-gradient(180deg, var(--bg1), var(--bg2));
+        }
+
+        :root[data-theme="light-fun"] .navbar {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .85), rgba(255, 255, 255, .55));
+        }
+
+        :root[data-theme="light-fun"] .card,
+        :root[data-theme="light-fun"] .modal-content {
+            backdrop-filter: blur(6px);
+        }
+
+        :root[data-theme="light-fun"] .list-group-item {
+            background: rgba(255, 255, 255, .85);
+        }
+
+        :root[data-theme="light-fun"] .btn-outline {
+            color: #1f2a44;
+            border-color: var(--glass-brd);
+        }
+
+        :root[data-theme="light-fun"] .prio-low {
+            background: #e7fbef;
+            color: #0d6b3a;
+            border-color: #a6e8c4
+        }
+
+        :root[data-theme="light-fun"] .prio-med {
+            background: #e9f0ff;
+            color: #274b95;
+            border-color: #b9ccff
+        }
+
+        :root[data-theme="light-fun"] .prio-high {
+            background: #ffe9e9;
+            color: #8c2c2c;
+            border-color: #ffc2c2
+        }
+
+        :root[data-theme="light-fun"] .prio-crit {
+            background: #ffe3e3;
+            color: #8c0f0f;
+            border-color: #ff9b9b
+        }
+
+        :root[data-theme="light-fun"] .badge-online {
+            background: #dff7eb;
+            color: #0d6b3a;
+            border-color: #a6e8c4
+        }
+
+        :root[data-theme="light-fun"] .badge-offline {
+            background: #ffe3e6;
+            color: #8c1f2b;
+            border-color: #ffb3bf
+        }
+
+        /* Selection outline for kanban cards */
+        .list-group-item.selected {
+            outline: 2px solid #7a42ff;
+            outline-offset: 2px
+        }
+
+        /* Progress bar */
+        #progressWrap {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        #progressBar {
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .12);
+            overflow: hidden
+        }
+
+        #progressBar>span {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, #7a42ff, #e21171);
+            transition: width .25s ease
+        }
+
+        /* Mascot */
+        #mascot {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 999;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #7a42ff, #e21171);
+            color: #fff;
+            font-size: 24px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, .25);
+            cursor: pointer;
+        }
+
+        #mascot.wiggle {
+            animation: wiggle .7s ease;
+        }
+
+        @keyframes wiggle {
+
+            0%,
+            100% {
+                transform: rotate(0)
+            }
+
+            25% {
+                transform: rotate(10deg)
+            }
+
+            75% {
+                transform: rotate(-10deg)
+            }
+        }
+
+        #presetSwitcher {
+            min-width: 180px;
+        }
+
+
+        :root[data-theme="light-fun"] body,
+        :root[data-theme="light-fun"] .navbar,
+        :root[data-theme="light-fun"] .card,
+        :root[data-theme="light-fun"] .modal-content {
+            color: #1a1c20;
+        }
+
+        :root[data-theme="light-fun"] .form-control,
+        :root[data-theme="light-fun"] .form-select {
+            background: #fff;
+            color: #1a1c20;
+            border: 1px solid #ccc;
+        }
+
+        :root[data-theme="light-fun"] .btn-primary {
+            background: linear-gradient(135deg, #7a42ff, #e21171);
+            color: #fff;
+        }
+
+        :root[data-theme="light-fun"] .navbar-brand-text,
+        :root[data-theme="light-fun"] .nav-link,
+        :root[data-theme="light-fun"] .form-label {
+            color: #1a1c20 !important;
+        }
+
+
+        /* --- Stronger light theme readability --- */
+        :root[data-theme="light-fun"] a,
+        :root[data-theme="light-fun"] .text-primary {
+            color: #1a3cff !important;
+        }
+
+        :root[data-theme="light-fun"] .card-title,
+        :root[data-theme="light-fun"] .navbar-brand-text,
+        :root[data-theme="light-fun"] .nav-link,
+        :root[data-theme="light-fun"] .badge,
+        :root[data-theme="light-fun"] .table th,
+        :root[data-theme="light-fun"] .table td,
+        :root[data-theme="light-fun"] .list-group-item,
+        :root[data-theme="light-fun"] .card,
+        :root[data-theme="light-fun"] .kanban .card-header,
+        :root[data-theme="light-fun"] label.form-label {
+            color: #1a1c20 !important;
+        }
+
+        :root[data-theme="light-fun"] .kanban .card-header {
+            background: #ffffffd9;
+            border-bottom: 1px dashed rgba(10, 20, 40, .15);
+        }
+
+        :root[data-theme="light-fun"] .list-group-item {
+            color: #1a1c20;
+        }
+
+        :root[data-theme="light-fun"] .badge.bg-indigo-lt {
+            background: #eef1ff;
+            color: #1a2a7a
+        }
+
+        :root[data-theme="light-fun"] .btn-outline {
+            color: #1a1c20;
+            border-color: rgba(10, 20, 40, .15)
+        }
+
+
+        /* --- Stronger kanban column headers for visibility --- */
+        .kanban .card-header {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.18) !important;
+        }
+
+        .kanban .card-header .card-title {
+            color: #e8ecff !important;
+            font-weight: 700;
+            letter-spacing: .2px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+            opacity: 1 !important;
+        }
+
+        :root[data-theme="light-fun"] .kanban .card-header {
+            background: #ffffffd9 !important;
+            border-bottom: 1px dashed rgba(10, 20, 40, .15) !important;
+        }
+
+        :root[data-theme="light-fun"] .kanban .card-header .card-title {
+            color: #1a1c20 !important;
+            text-shadow: none;
+        }
+
+
+        /* Mascot badge counter */
+        #mascot {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 999;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #7a42ff, #e21171);
+            color: #fff;
+            font-size: 24px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, .25);
+            cursor: pointer;
+        }
+
+        #mascot .badge-bubble {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ff3b30;
+            color: #fff;
+            font-size: 12px;
+            line-height: 18px;
+            width: 18px;
+            height: 18px;
+            text-align: center;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, .2);
+            display: none;
+        }
+
+        #mascot.has-urgent .badge-bubble {
+            display: block;
+        }
+
+        .deadline-chip {
+            border-radius: 999px;
+            padding: .25rem .5rem;
+            font-size: .75rem;
+            background: #3a2a1a;
+            color: #ffdcb3;
+            border: 1px solid #7b5a2f
+        }
+
+        :root[data-theme="light-fun"] .deadline-chip {
+            background: #fff4e6;
+            color: #7a4b12;
+            border-color: #ffd49b
+        }
+
+
+        /* Comment badge color tweak */
+        .badge.bg-indigo {
+            background: #4f46e5;
+        }
+
+
+        /* Brighter & larger task titles in table */
+        .task-title {
+            font-size: 1rem;
+            /* ~16px */
+            font-weight: 600;
+            color: #e6edff !important;
+            /* high-contrast for dark theme */
+        }
+
+        :root[data-theme="light-fun"] .task-title {
+            color: #102a43 !important;
+            /* deep navy for readability on light */
+        }
+
+        .task-title:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="page">
-    <header class="navbar navbar-expand-md navbar-dark d-print-none">
-      <div class="container-xl">
-        <h1 class="navbar-brand navbar-brand-autodark pe-0 me-4">
-          <span class="navbar-brand-text">Task Manager — Tabler UI</span>
-        </h1>
+    <div class="page">
+        <header class="navbar navbar-expand-md navbar-dark d-print-none">
+            <div class="container-xl">
+                <h1 class="navbar-brand navbar-brand-autodark pe-0 me-4">
+                    <span class="navbar-brand-text">Task Manager — Tabler UI</span> <span title="вперёд!">✨</span>
+                </h1>
 
-        <div class="navbar-nav flex-row order-md-last">
-          <span id="onlineBadge" class="badge me-3 badge-offline">OFFLINE</span>
-          <a id="btnTheme" class="btn btn-icon" title="Тема">
-            <i class="ti ti-sun"></i>
-          </a>
-          <a id="btnCloud" class="btn btn-primary ms-2" href="#!" onclick="cloudSave()">
-            <i class="ti ti-cloud-upload me-1"></i> Сохранить в облако
-          </a>
-        </div>
+                <div class="navbar-nav flex-row order-md-last">
+                    <span id="onlineBadge" class="badge me-3 badge-offline">OFFLINE</span>
+                    <a id="btnTheme" class="btn btn-icon" title="Тема">
+                        <i class="ti ti-sun"></i>
+                    </a>
+                    <button id="btnThemeToggle" class="btn btn-outline me-2">🌗 Тема</button>
 
-        <div class="collapse navbar-collapse" id="navbar-menu">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a id="link-table" class="nav-link active" data-bs-toggle="tab" href="#tab-table" role="tab" aria-controls="tab-table" aria-selected="true">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  <i class="ti ti-table"></i>
-                </span>
-                <span class="nav-link-title">Таблица</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a id="link-kanban" class="nav-link" data-bs-toggle="tab" href="#tab-kanban" role="tab" aria-controls="tab-kanban" aria-selected="false">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  <i class="ti ti-layout-kanban"></i>
-                </span>
-                <span class="nav-link-title">Канбан</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </header>
+                    <a id="btnCloud" class="btn btn-primary ms-1" href="#!" onclick="cloudSave()">
+                        <i class="ti ti-cloud-upload me-1"></i> Сохранить в облако
+                    </a>
+                </div>
 
-    <div class="page-wrapper">
-      <div class="container-xl py-3">
-        <div class="row g-3 align-items-end">
-          <div class="col-sm-6 col-lg-3">
-            <label class="form-label">Поиск</label>
-            <input id="fltText" type="text" class="form-control" placeholder="Название, описание..." />
-          </div>
-          <div class="col-sm-6 col-lg-2">
-            <label class="form-label">Статус</label>
-            <select id="fltStatus" class="form-select"></select>
-          </div>
-          <div class="col-sm-6 col-lg-2">
-            <label class="form-label">Приоритет</label>
-            <select id="fltPrio" class="form-select"></select>
-          </div>
-          <div class="col-6 col-lg-2">
-            <label class="form-label">От</label>
-            <input id="fltDueFrom" type="date" class="form-control" />
-          </div>
-          <div class="col-6 col-lg-2">
-            <label class="form-label">До</label>
-            <input id="fltDueTo" type="date" class="form-control" />
-          </div>
-          <div class="col-12 col-lg-1">
-            <button id="btnResetFilters" class="btn btn-outline-secondary w-100">Сброс</button>
-          </div>
-        </div>
-
-        <div class="card mt-3">
-          <div class="card-body py-2 d-flex gap-2 flex-wrap">
-            <button id="btnAdd" class="btn btn-primary"><i class="ti ti-plus me-1"></i> Добавить</button>
-            <button id="btnExportExcel" class="btn btn-outline-warning"><i class="ti ti-file-spreadsheet me-1"></i> Экспорт Excel</button>
-            <button id="btnExportCSV" class="btn btn-outline-secondary"><i class="ti ti-file-certificate me-1"></i> Экспорт CSV</button>
-            <button id="btnImportExcel" class="btn btn-outline-secondary"><i class="ti ti-file-import me-1"></i> Импорт Excel</button>
-            <button id="btnImportCSV" class="btn btn-outline-secondary"><i class="ti ti-database-import me-1"></i> Импорт CSV</button>
-            <button id="btnSaveLocal" class="btn btn-outline-success"><i class="ti ti-device-floppy me-1"></i> В браузер</button>
-            <button id="btnLoadLocal" class="btn btn-outline-info"><i class="ti ti-database me-1"></i> Из браузера</button>
-            <button id="btnClearAll" class="btn btn-outline-danger"><i class="ti ti-trash me-1"></i> Очистить</button>
-          </div>
-        </div>
-
-        <div class="tab-content mt-3">
-          <div id="tab-table" class="tab-pane active show">
-            <div class="card">
-              <div class="table-responsive">
-                <table class="table table-vcenter card-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Название</th>
-                      <th>Статус</th>
-                      <th>Приоритет</th>
-                      <th>Ответственный</th>
-                      <th>Дедлайн</th>
-                      <th>Теги</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbody"></tbody>
-                </table>
-              </div>
+                <div class="collapse navbar-collapse" id="navbar-menu">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a id="link-table" class="nav-link active" data-bs-toggle="tab" href="#tab-table" role="tab" aria-controls="tab-table" aria-selected="true">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <i class="ti ti-table"></i>
+                                </span>
+                                <span class="nav-link-title">Таблица</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="link-kanban" class="nav-link" data-bs-toggle="tab" href="#tab-kanban" role="tab" aria-controls="tab-kanban" aria-selected="false">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <i class="ti ti-layout-kanban"></i>
+                                </span>
+                                <span class="nav-link-title">Канбан</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-          </div>
-          <div id="tab-kanban" class="tab-pane">
-            <div class="kanban" id="kanban"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        </header>
 
-  <div class="modal modal-blur fade" id="modalEdit" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width:860px;" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle">Новая задача</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-12">
-            <div class="row g-3">
-  <div class="col-sm-6">
-    <label class="form-label">Название</label>
-    <input id="fmTitle" type="text" class="form-control" />
-  </div>
-  <div class="col-sm-6">
-    <label class="form-label">Ответственный</label>
-    <input id="fmAssignee" type="text" class="form-control" />
-  </div>
-</div>
-            <div class="row g-3">
-  <div class="col-sm-4">
-    <label class="form-label">Статус</label>
-    <select id="fmStatus" class="form-select"></select>
-  </div>
-  <div class="col-sm-4">
-    <label class="form-label">Приоритет</label>
-    <select id="fmPrio" class="form-select"></select>
-  </div>
-  <div class="col-sm-4">
-    <label class="form-label">Дедлайн</label>
-    <input id="fmDue" type="date" class="form-control" />
-  </div>
-</div>
-<div class="row g-3">
-  <div class="col-12">
-    <label class="form-label">Теги (через запятую)</label>
-    <input id="fmTags" type="text" class="form-control" />
-  </div>
-</div>
-<div class="row g-3">
-  <div class="col-12">
-    <label class="form-label">Описание</label>
-    <textarea id="fmDesc" rows="3" class="form-control"></textarea>
-  </div>
-</div>
-          </div>
-            <div class="mt-4">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <h3 class="m-0">Комментарии</h3>
-                <span class="badge bg-indigo-lt" id="cmCount">0</span>
-              </div>
-              <div class="card mb-2">
-                <div class="card-body p-2" id="commentsList" style="max-height:30vh; overflow:auto"></div>
-              </div>
-              <div class="row g-2">
-                <div class="col-sm-4"><input id="fmCommentAuthor" type="text" class="form-control form-control-sm" placeholder="Автор (необязательно)" /></div>
-                <div class="col-sm-8"><textarea id="fmCommentText" rows="2" class="form-control" placeholder="Ваш комментарий… (Ctrl+Enter — отправить)"></textarea></div>
-              </div>
-              <button id="btnAddComment" class="btn btn-primary mt-2"><i class="ti ti-message-plus me-1"></i> Добавить комментарий</button>
+        <div id="progressWrap" class="container-xl pt-2">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="small text-secondary">Прогресс</div>
+                <div class="flex-fill" id="progressBar"><span style="width:0%"></span></div>
+                <span class="badge bg-indigo-lt" id="progressPct">0%</span>
             </div>
-          </div>
         </div>
-        <div class="modal-footer">
-          <button id="btnDelete" class="btn btn-danger me-auto" style="display:none"><i class="ti ti-trash"></i> Удалить</button>
-          <button class="btn me-2" data-bs-dismiss="modal">Отмена</button>
-          <button id="btnSave" class="btn btn-primary"><i class="ti ti-device-floppy"></i> Сохранить</button>
+        <div class="page-wrapper">
+            <div class="container-xl py-3">
+                <div class="row g-3 align-items-end">
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="form-label">Поиск</label>
+                        <input id="fltText" type="text" class="form-control" placeholder="Название, описание, теги, исполнитель…" />
+                    </div>
+                    <div class="col-sm-6 col-lg-2">
+                        <label class="form-label">Статус</label>
+                        <select id="fltStatus" class="form-select"></select>
+                    </div>
+                    <div class="col-sm-6 col-lg-2">
+                        <label class="form-label">Приоритет</label>
+                        <select id="fltPrio" class="form-select"></select>
+                    </div>
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label">Месяц создания</label>
+                        <input id="fltMonth" type="month" class="form-control" />
+                    </div>
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label">От</label>
+                        <input id="fltDueFrom" type="date" class="form-control" />
+                    </div>
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label">До</label>
+                        <input id="fltDueTo" type="date" class="form-control" />
+                    </div>
+                    <div class="col-12 col-lg-1">
+                        <button id="btnResetFilters" class="btn btn-outline-secondary w-100">Сброс</button>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body py-2 d-flex gap-2 flex-wrap">
+                        <button id="btnAdd" class="btn btn-primary"><i class="ti ti-plus me-1"></i> Добавить</button>
+                        <button id="btnExportExcel" class="btn btn-outline-warning"><i class="ti ti-file-spreadsheet me-1"></i> Экспорт Excel</button>
+                        <button id="btnExportCSV" class="btn btn-outline-secondary"><i class="ti ti-file-certificate me-1"></i> Экспорт CSV</button>
+                        <button id="btnImportExcel" class="btn btn-outline-secondary"><i class="ti ti-file-import me-1"></i> Импорт Excel</button>
+                        <button id="btnImportCSV" class="btn btn-outline-secondary"><i class="ti ti-database-import me-1"></i> Импорт CSV</button>
+                        <button id="btnSaveLocal" class="btn btn-outline-success"><i class="ti ti-device-floppy me-1"></i> В браузер</button>
+                        <button id="btnLoadLocal" class="btn btn-outline-info"><i class="ti ti-database me-1"></i> Из браузера</button>
+
+                    </div>
+                </div>
+
+                <div class="tab-content mt-3">
+                    <div id="tab-table" class="tab-pane active show">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table class="table table-vcenter card-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Название</th>
+                                            <th>Статус</th>
+                                            <th>Приоритет</th>
+                                            <th>Ответственный</th>
+                                            <th>Дедлайн</th>
+                                            <th>Теги</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-kanban" class="tab-pane">
+                        <div class="kanban" id="kanban"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <input type="file" id="fileExcel" accept=".xlsx,.xls" hidden />
-  <input type="file" id="fileCSV" accept=".csv" hidden />
+    <div class="modal modal-blur fade" id="modalEdit" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width:860px;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Новая задача</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label">Название</label>
+                                    <input id="fmTitle" type="text" class="form-control" />
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label">Ответственный</label>
+                                    <input id="fmAssignee" type="text" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-sm-4">
+                                    <label class="form-label">Статус</label>
+                                    <select id="fmStatus" class="form-select"></select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label">Приоритет</label>
+                                    <select id="fmPrio" class="form-select"></select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label">Дедлайн</label>
+                                    <input id="fmDue" type="date" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Теги (через запятую)</label>
+                                    <input id="fmTags" type="text" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Описание</label>
+                                    <textarea id="fmDesc" rows="3" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h3 class="m-0">Комментарии</h3>
+                                <span class="badge bg-indigo-lt" id="cmCount">0</span>
+                            </div>
+                            <div class="card mb-2">
+                                <div class="card-body p-2" id="commentsList" style="max-height:30vh; overflow:auto"></div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-sm-4"><input id="fmCommentAuthor" type="text" class="form-control form-control-sm" placeholder="Автор (необязательно)" /></div>
+                                <div class="col-sm-8"><textarea id="fmCommentText" rows="2" class="form-control" placeholder="Ваш комментарий… (Ctrl+Enter — отправить)"></textarea></div>
+                            </div>
+                            <button id="btnAddComment" class="btn btn-primary mt-2"><i class="ti ti-message-plus me-1"></i> Добавить комментарий</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnDelete" class="btn btn-danger me-auto" style="display:none"><i class="ti ti-trash"></i> Удалить</button>
+                    <button class="btn me-2" data-bs-dismiss="modal">Отмена</button>
+                    <button id="btnSave" class="btn btn-primary"><i class="ti ti-device-floppy"></i> Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <!-- IMPORTANT: Ensure Bootstrap 5 is present so tabs & modal work and window.bootstrap is defined -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Tabler JS (after Bootstrap bundle) -->
-  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
-  <!-- XLSX -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Urgent Tasks Modal -->
+    <div class="modal modal-blur fade" id="modalUrgent" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Важные и срочные задачи</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="urgentEmpty" class="text-secondary">Здесь появятся задачи с высоким приоритетом или дедлайном в ближайшие 3 дня.</div>
+                    <div id="urgentList" class="list-group list-group-flush"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <script>
-  // ====== CLOUD CONFIG (вшито) ======
-  let CLOUD_URL     = "https://script.google.com/macros/s/AKfycbyq_1gmzUt40zMTvk5SqzAQxMuocwz9ApOXTyuJk-fFKCjAYbBn5KzKMmc0goTwxfw4/exec";
-  let CLOUD_PROFILE = "default";
-  let CLOUD_MODE    = "jsonp";
+    <input type="file" id="fileExcel" accept=".xlsx,.xls" hidden />
+    <input type="file" id="fileCSV" accept=".csv" hidden />
 
-  // ====== DATA ======
-  const STATUS_CHOICES = ["Новая","В работе","Ожидает","Готово","Отменена"];
-  const PRIORITY_CHOICES = ["Низкий","Средний","Высокий","Критично"];
-  let tasks = [];
-  let editingId = null;
+    <!-- IMPORTANT: Ensure Bootstrap 5 is present so tabs & modal work and window.bootstrap is defined -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Tabler JS (after Bootstrap bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
+    <!-- XLSX -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  // ====== UI helpers ======
-  const $ = (s, root=document) => root.querySelector(s);
+    <script>
+        // ====== CLOUD CONFIG (вшито) ======
+        let CLOUD_URL = "https://script.google.com/macros/s/AKfycbyq_1gmzUt40zMTvk5SqzAQxMuocwz9ApOXTyuJk-fFKCjAYbBn5KzKMmc0goTwxfw4/exec";
+        let CLOUD_PROFILE = "default";
+        let CLOUD_MODE = "jsonp";
 
-  function setOnlineBadge(state){
-    const el = $("#onlineBadge");
-    if(state){ el.textContent = "ONLINE · " + CLOUD_PROFILE; el.className = "badge me-3 badge-online"; }
-    else { el.textContent = "OFFLINE"; el.className = "badge me-3 badge-offline"; }
-  }
+        // ====== DATA ======
+        const STATUS_CHOICES = ["Новая", "В работе", "Ожидает", "Готово", "Отменена"];
+        const PRIORITY_CHOICES = ["Низкий", "Средний", "Высокий", "Критично"];
+        let tasks = [];
+        let editingId = null;
 
-  // Theme toggle
-  $("#btnTheme").addEventListener("click", ()=>{
-    const html = document.documentElement;
-    const isDark = html.getAttribute("data-bs-theme") !== "light";
-    html.setAttribute("data-bs-theme", isDark ? "light" : "dark");
-    $("#btnTheme .ti").className = "ti " + (isDark ? "ti-moon" : "ti-sun");
-  });
+        // ====== UI helpers ======
+        const $ = (s, root = document) => root.querySelector(s);
 
-  // ====== JSONP helper ======
-  function jsonp(url){
-    return new Promise((resolve,reject)=>{
-      const cb="cb_"+Math.random().toString(36).slice(2);
-      window[cb]=(data)=>{ resolve(data); cleanup(); };
-      function cleanup(){ delete window[cb]; script.remove(); clearTimeout(t); }
-      const script=document.createElement("script");
-      script.src=url+(url.includes("?")?"&":"?")+"callback="+cb;
-      script.onerror=()=>{ reject(new Error("JSONP error")); cleanup(); };
-      document.body.appendChild(script);
-      const t=setTimeout(()=>{ reject(new Error("JSONP timeout")); cleanup(); }, 8000);
-    });
-  }
+        function setOnlineBadge(state) {
+            const el = $("#onlineBadge");
+            if (state) {
+                el.textContent = "ONLINE · " + CLOUD_PROFILE;
+                el.className = "badge me-3 badge-online";
+            } else {
+                el.textContent = "OFFLINE";
+                el.className = "badge me-3 badge-offline";
+            }
+        }
 
-  // ====== Cloud (load/save) ======
-  async function cloudLoad(){
-    try{
-      if(CLOUD_MODE==="jsonp"){
-        const data = await jsonp(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`);
-        if(data && Array.isArray(data.tasks)){ tasks = data.tasks; drawTable(); drawKanban(); setOnlineBadge(true); return; }
-        throw new Error("bad jsonp result");
-      }else{
-        const r = await fetch(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`);
-        const data = await r.json();
-        if(data && Array.isArray(data.tasks)){ tasks = data.tasks; drawTable(); drawKanban(); setOnlineBadge(true); return; }
-        throw new Error("bad fetch result");
-      }
-    }catch(e){ console.warn(e); setOnlineBadge(false); }
-  }
-
-  async function cloudSave(){
-    try{
-      if(CLOUD_MODE==="jsonp"){
-        await jsonp(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}&write=1&data=${encodeURIComponent(JSON.stringify(tasks))}`);
-        setOnlineBadge(true);
-      }else{
-        await fetch(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`, {
-          method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({tasks}), mode:"no-cors"
+        // Theme toggle
+        $("#btnTheme").addEventListener("click", () => {
+            const html = document.documentElement;
+            const isDark = html.getAttribute("data-bs-theme") !== "light";
+            html.setAttribute("data-bs-theme", isDark ? "light" : "dark");
+            $("#btnTheme .ti").className = "ti " + (isDark ? "ti-moon" : "ti-sun");
         });
-        setOnlineBadge(true);
-      }
-    }catch(e){ console.warn(e); setOnlineBadge(false); }
-  }
 
-  // ====== Filters ======
-  function fillFilters(){
-    $("#fltStatus").innerHTML = '<option value="">Любой</option>' + STATUS_CHOICES.map(s=>`<option>${s}</option>`).join("");
-    $("#fltPrio").innerHTML = '<option value="">Любой</option>' + PRIORITY_CHOICES.map(s=>`<option>${s}</option>`).join("");
-  }
+        // ====== JSONP helper ======
+        function jsonp(url) {
+            return new Promise((resolve, reject) => {
+                const cb = "cb_" + Math.random().toString(36).slice(2);
+                window[cb] = (data) => {
+                    resolve(data);
+                    cleanup();
+                };
 
-  function passFilters(t){
-    const q = $("#fltText").value.trim().toLowerCase();
-    const st = $("#fltStatus").value; const pr = $("#fltPrio").value;
-    const df = $("#fltDueFrom").value; const dt = $("#fltDueTo").value;
-    if(q){ const blob=((t.Название||"")+" "+(t.Описание||"")).toLowerCase(); if(!blob.includes(q)) return false; }
-    if(st && t.Статус!==st) return false;
-    if(pr && t.Приоритет!==pr) return false;
-    const due = t.Дедлайн ? new Date(t.Дедлайн) : null;
-    if(df && (!due || due < new Date(df+"T00:00:00"))) return false;
-    if(dt && (!due || due > new Date(dt+"T23:59:59"))) return false;
-    return true;
-  }
+                function cleanup() {
+                    delete window[cb];
+                    script.remove();
+                    clearTimeout(t);
+                }
+                const script = document.createElement("script");
+                script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+                script.onerror = () => {
+                    reject(new Error("JSONP error"));
+                    cleanup();
+                };
+                document.body.appendChild(script);
+                const t = setTimeout(() => {
+                    reject(new Error("JSONP timeout"));
+                    cleanup();
+                }, 8000);
+            });
+        }
 
-  ["#fltText","#fltStatus","#fltPrio","#fltDueFrom","#fltDueTo"].forEach(sel=>{
-    $(sel).addEventListener("input", ()=>{ drawTable(); drawKanban(); });
-    $(sel).addEventListener("change", ()=>{ drawTable(); drawKanban(); });
-  });
+        // ====== Cloud (load/save) ======
+        async function cloudLoad() {
+            try {
+                if (CLOUD_MODE === "jsonp") {
+                    try {
+                        const data = await jsonp(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`);
+                        if (data && Array.isArray(data.tasks)) {
+                            tasks = data.tasks;
+                            drawTable();
+                            drawKanban();
+                            setOnlineBadge(true);
+                            return;
+                        }
+                        throw new Error("bad jsonp result");
+                    } catch (_) {
+                        // Fallback to fetch GET
+                        const r = await fetch(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`);
+                        const data = await r.json();
+                        if (data && Array.isArray(data.tasks)) {
+                            tasks = data.tasks;
+                            drawTable();
+                            drawKanban();
+                            setOnlineBadge(true);
+                            return;
+                        }
+                        throw new Error("bad fetch result");
+                    }
+                } else {
+                    const r = await fetch(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`);
+                    const data = await r.json();
+                    if (data && Array.isArray(data.tasks)) {
+                        tasks = data.tasks;
+                        drawTable();
+                        drawKanban();
+                        setOnlineBadge(true);
+                        return;
+                    }
+                    throw new Error("bad fetch result");
+                }
+            } catch (e) {
+                console.warn(e);
+                setOnlineBadge(false);
+            }
+        }
 
-  $("#btnResetFilters").addEventListener("click", ()=>{
-    $("#fltText").value=""; $("#fltStatus").value=""; $("#fltPrio").value="";
-    $("#fltDueFrom").value=""; $("#fltDueTo").value="";
-    drawTable(); drawKanban();
-  });
+        async function cloudSave() {
+            try {
+                const payloadStr = JSON.stringify(tasks);
+                const qs = `${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}&write=1&data=${encodeURIComponent(payloadStr)}`;
+                // If URL is small enough, try JSONP first
+                if (CLOUD_MODE === "jsonp" && qs.length < 1800) {
+                    await jsonp(qs);
+                    setOnlineBadge(true);
+                    return;
+                }
+                // Fallback to POST for big payloads or when CLOUD_MODE != jsonp
+                await fetch(CLOUD_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        profile: CLOUD_PROFILE,
+                        tasks
+                    }),
+                    mode: "no-cors"
+                });
+                setOnlineBadge(true);
+            } catch (e) {
+                console.warn("cloudSave primary error:", e);
+                // Last-resort: try the other method once
+                try {
+                    await jsonp(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}&write=1&data=${encodeURIComponent(JSON.stringify(tasks))}`);
+                    setOnlineBadge(true);
+                } catch (err) {
+                    console.warn("cloudSave fallback error:", err);
+                    setOnlineBadge(false);
+                }
+            }
+        }
 
-  // ====== Table ======
-  function prioChip(p){
-    const m = {
-      "Низкий":"prio-low","Средний":"prio-med","Высокий":"prio-high","Критично":"prio-crit"
-    };
-    return `<span class="prio-chip ${m[p]||'prio-med'}">${p||''}</span>`;
-  }
-  function initials(name){
-    const s = (name||"").trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||"").join("");
-    return `<span class="avatar-initials" title="${name||''}">${s||"?"}</span>`;
-  }
-  function optionList(val, arr){return arr.map(s=>`<option ${s===val?'selected':''}>${s}</option>`).join("")}
-function drawTable(){
-    const tbody = $("#tbody"); tbody.innerHTML = "";
-    tasks.filter(passFilters).forEach(t=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
+        // ====== Filters ======
+        function fillFilters() {
+            $("#fltStatus").innerHTML = '<option value="">Любой</option>' + STATUS_CHOICES.map(s => `<option>${s}</option>`).join("");
+            $("#fltPrio").innerHTML = '<option value="">Любой</option>' + PRIORITY_CHOICES.map(s => `<option>${s}</option>`).join("");
+        }
+
+
+        function passFilters(t) {
+            const q = $("#fltText").value.trim().toLowerCase();
+            const st = $("#fltStatus").value;
+            const pr = $("#fltPrio").value;
+            const df = $("#fltDueFrom").value;
+            const dt = $("#fltDueTo").value;
+            const mf = $("#fltMonth") ? $("#fltMonth").value : "";
+            // Extended search: title, desc, tags, assignee, priority, status, comments, and ID (all words must match)
+            if (q) {
+                const commentsStr = (t.Комментарии || []).map(c => `${c.author||""} ${c.text||""}`).join(" ");
+                const blob = [
+                    String(t.ID || ""),
+                    t.Название || "", t.Описание || "",
+                    t.Ответственный || "", t.Статус || "", t.Приоритет || "",
+                    (t.Теги || "").replace(/[,#]/g, " "),
+                    commentsStr
+                ].join(" ").toLowerCase();
+                const words = q.split(/\s+/).filter(Boolean);
+                for (const w of words) {
+                    if (!blob.includes(w)) return false;
+                }
+            }
+            if (st && t.Статус !== st) return false;
+            if (pr && t.Приоритет !== pr) return false;
+            const due = t.Дедлайн ? new Date(t.Дедлайн) : null;
+            if (df && (!due || due < new Date(df + "T00:00:00"))) return false;
+            if (dt && (!due || due > new Date(dt + "T23:59:59"))) return false;
+            if (mf) {
+                const created = t.Создано ? new Date(t.Создано) : null;
+                if (!created) return false;
+                const [yy, mm] = mf.split("-").map(Number);
+                const start = new Date(yy, (mm || 1) - 1, 1, 0, 0, 0, 0);
+                const end = new Date(yy, (mm || 1), 0, 23, 59, 59, 999); // last day of month
+                if (created < start || created > end) return false;
+            }
+            return true;
+        }
+
+        ["#fltText", "#fltStatus", "#fltPrio", "#fltDueFrom", "#fltDueTo", "#fltMonth"].forEach(sel => {
+            $(sel).addEventListener("input", () => {
+                drawTable();
+                drawKanban();
+            });
+            $(sel).addEventListener("change", () => {
+                drawTable();
+                drawKanban();
+            });
+        });
+
+        $("#btnResetFilters").addEventListener("click", () => {
+            $("#fltText").value = "";
+            $("#fltStatus").value = "";
+            $("#fltPrio").value = "";
+            $("#fltDueFrom").value = "";
+            $("#fltDueTo").value = "";
+            $("#fltMonth").value = "";
+            drawTable();
+            drawKanban();
+        });
+
+        // ====== Table ======
+        function commentsBadge(t) {
+            const n = (t.Комментарии || []).length || 0;
+            return n > 0 ? `<span class="badge bg-indigo ms-1 cursor-pointer" title="Комментарии" data-open-comments="${t.ID}">💬 ${n}</span>` : "";
+        }
+
+        function renderTagsCell(t) {
+            const tags = (t.Теги || "").split(",").filter(Boolean).map(s => `<span class="badge bg-indigo-lt me-1">${escapeHtml(s.trim())}</span>`).join("");
+            return tags + commentsBadge(t);
+        }
+
+        function prioChip(p) {
+            const m = {
+                "Низкий": "prio-low",
+                "Средний": "prio-med",
+                "Высокий": "prio-high",
+                "Критично": "prio-crit"
+            };
+            return `<span class="prio-chip ${m[p]||'prio-med'}">${p||''}</span>`;
+        }
+
+        function initials(name) {
+            const s = (name || "").trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() || "").join("");
+            return `<span class="avatar-initials" title="${name||''}">${s||"?"}</span>`;
+        }
+
+        function optionList(val, arr) {
+            return arr.map(s => `<option ${s===val?'selected':''}>${s}</option>`).join("")
+        }
+
+        function drawTable() {
+            const tbody = $("#tbody");
+            tbody.innerHTML = "";
+            tasks.filter(passFilters).forEach(t => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
         <td>${t.ID ?? ""}</td>
-        <td class="cursor-pointer text-primary">${escapeHtml(t.Название||"")}</td>
+        <td class="cursor-pointer text-primary task-title">${escapeHtml(t.Название||"")}</td>
         <td><select class="form-select form-select-sm" data-inline-status>${optionList(t.Статус||"Новая", STATUS_CHOICES)}</select></td>
         <td><select class="form-select form-select-sm" data-inline-prio>${optionList(t.Приоритет||"Средний", PRIORITY_CHOICES)}</select></td>
         <td>${initials(t.Ответственный)} <span class="ms-1">${escapeHtml(t.Ответственный||"")}</span></td>
         <td>${t.Дедлайн ? new Date(t.Дедлайн).toLocaleDateString('ru-RU') : ""}</td>
-        <td>${(t.Теги||"").split(",").filter(Boolean).map(s=>`<span class="badge bg-indigo-lt me-1">${escapeHtml(s.trim())}</span>`).join("")}<span class="badge bg-indigo-lt ms-1">${(t.Комментарии||[]).length||0}</span></td>
+        <td>${renderTagsCell(t)}</td>
         <td class="text-end">
           <button class="btn btn-sm btn-outline-primary me-1" data-edit>Ред.</button>
           <button class="btn btn-sm btn-outline-danger" data-del>Удалить</button>
         </td>`;
-      tr.querySelector("[data-edit]").addEventListener("click", ()=>openModal(t.ID));
-      tr.querySelector("[data-del]").addEventListener("click", ()=>{ if(confirm("Удалить?")){ tasks = tasks.filter(x=>x.ID!==t.ID); cloudSave(); drawTable(); drawKanban(); }});
-      tr.children[1].addEventListener("click", ()=>openModal(t.ID));
-      tr.querySelector("[data-inline-status]").addEventListener("change", (e)=>{ const v=e.target.value; const i=tasks.findIndex(x=>x.ID===t.ID); if(i>=0){ tasks[i].Статус=v; tasks[i].Обновлено=new Date().toISOString(); cloudSave(); drawKanban(); }});
-      tr.querySelector("[data-inline-prio]").addEventListener("change", (e)=>{ const v=e.target.value; const i=tasks.findIndex(x=>x.ID===t.ID); if(i>=0){ tasks[i].Приоритет=v; tasks[i].Обновлено=new Date().toISOString(); cloudSave(); drawKanban(); }});
-      tbody.appendChild(tr);
-    });
-  }
+                tr.querySelector("[data-edit]").addEventListener("click", () => openModal(t.ID));
+                tr.querySelector("[data-del]").addEventListener("click", () => {
+                    if (confirm("Удалить?")) {
+                        tasks = tasks.filter(x => x.ID !== t.ID);
+                        cloudSave();
+                        drawTable();
+                        drawKanban();
+                    }
+                });
+                tr.children[1].addEventListener("click", () => openModal(t.ID));
+                const cmBtn = tr.querySelector("[data-open-comments]");
+                if (cmBtn) {
+                    cmBtn.addEventListener("click", () => openModal(t.ID));
+                }
+                tr.querySelector("[data-inline-status]").addEventListener("change", (e) => {
+                    const v = e.target.value;
+                    const i = tasks.findIndex(x => x.ID === t.ID);
+                    if (i >= 0) {
+                        tasks[i].Статус = v;
+                        tasks[i].Обновлено = new Date().toISOString();
+                        cloudSave();
+                        drawKanban();
+                    }
+                });
+                tr.querySelector("[data-inline-prio]").addEventListener("change", (e) => {
+                    const v = e.target.value;
+                    const i = tasks.findIndex(x => x.ID === t.ID);
+                    if (i >= 0) {
+                        tasks[i].Приоритет = v;
+                        tasks[i].Обновлено = new Date().toISOString();
+                        cloudSave();
+                        drawKanban();
+                    }
+                });
+                tbody.appendChild(tr);
+            });
+        }
 
-  // ====== Kanban (with Drag & Drop) ======
-  function drawKanban(){
-    const root = $("#kanban"); root.innerHTML="";
-    const groups = STATUS_CHOICES.map(s=>({name:s, items:[] }));
-    tasks.filter(passFilters).forEach(t=>{
-      const i = Math.max(0, STATUS_CHOICES.indexOf(t.Статус||"Новая"));
-      groups[i].items.push(t);
-    });
-    groups.forEach(g=>{
-      const col = document.createElement("div");
-      col.className = "card kanban-column";
-      col.innerHTML = `
-        <div class="card-header"><h3 class="card-title">${g.name}</h3></div>
+        // ====== Kanban (with Drag & Drop) ======
+        function drawKanban() {
+            const root = $("#kanban");
+            root.innerHTML = "";
+            const groups = STATUS_CHOICES.map(s => ({
+                name: s,
+                items: []
+            }));
+            tasks.filter(passFilters).forEach(t => {
+                const i = Math.max(0, STATUS_CHOICES.indexOf(t.Статус || "Новая"));
+                groups[i].items.push(t);
+            });
+            groups.forEach(g => {
+                const col = document.createElement("div");
+                col.className = "card kanban-column";
+                col.innerHTML = `
+        <div class="card-header"><h3 class="card-title"><span class="k-emoji">${STATUS_EMOJI[g.name]||"📌"}</span>${g.name}</h3></div>
         <div class="list-group list-group-flush" data-col="${g.name}"></div>`;
-      const list = col.querySelector(".list-group");
-      // Allow drop
-      list.addEventListener("dragover", (e)=>{ e.preventDefault(); if(e.dataTransfer){ e.dataTransfer.dropEffect = "move"; } list.classList.add("drop-target"); });
-      list.addEventListener("dragleave", ()=>{ list.classList.remove("drop-target"); });
-      list.addEventListener("drop", (e)=>{ e.preventDefault(); list.classList.remove("drop-target"); kanbanDrop(list, e); });
+                const list = col.querySelector(".list-group");
+                // Allow drop
+                list.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer) {
+                        e.dataTransfer.dropEffect = "move";
+                    }
+                    list.classList.add("drop-target");
+                });
+                list.addEventListener("dragleave", () => {
+                    list.classList.remove("drop-target");
+                });
+                list.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    list.classList.remove("drop-target");
+                    kanbanDrop(list, e);
+                });
 
-      g.items.forEach(t=>{
-        const item = document.createElement("div");
-        item.className = "list-group-item";
-        item.setAttribute("draggable","true");
-        item.dataset.id = t.ID;
-        item.addEventListener("dragstart", kanbanDragStart);
-        item.addEventListener("dragend", kanbanDragEnd);
-        item.innerHTML = `
+                if (!g.items.length) {
+                    const empty = document.createElement("div");
+                    empty.className = "list-group-item text-secondary";
+                    empty.innerHTML = "Пока пусто — перетащите задачу сюда ✨";
+                    list.appendChild(empty);
+                }
+                g.items.forEach(t => {
+                    const item = document.createElement("div");
+                    item.className = "list-group-item";
+                    item.setAttribute("draggable", "true");
+                    item.dataset.id = t.ID;
+                    item.addEventListener("dragstart", kanbanDragStart);
+                    item.addEventListener("dragend", kanbanDragEnd);
+                    item.innerHTML = `
           <div class="row align-items-center">
             <div class="col"><strong class="cursor-pointer text-primary">${escapeHtml(t.Название||"")}</strong>
               <div class="text-secondary small">${initials(t.Ответственный)} <span class="ms-1">${escapeHtml(t.Ответственный||"")}</span> · ${t.Дедлайн?new Date(t.Дедлайн).toLocaleDateString('ru-RU'):""}</div>
             </div>
             <div class="col-auto">
               ${prioChip(t.Приоритет)}
-              <span class="badge bg-indigo-lt ms-2">${(t.Комментарии||[]).length||0}</span>
+              ${commentsBadge(t)}
               <button class="btn btn-sm btn-outline ms-2" data-edit><i class="ti ti-pencil"></i></button>
             </div>
           </div>`;
-        item.querySelector("[data-edit]").addEventListener("click", ()=>openModal(t.ID));
-        item.querySelector(".cursor-pointer").addEventListener("click", ()=>openModal(t.ID));
-        list.appendChild(item);
-      });
-      root.appendChild(col);
-    });
-  }
+                    item.querySelector("[data-edit]").addEventListener("click", () => openModal(t.ID));
+                    item.querySelector(".cursor-pointer").addEventListener("click", () => openModal(t.ID));
+                    list.appendChild(item);
+                });
+                root.appendChild(col);
+            });
+        }
 
-  // DnD handlers
-  let dragId = null;
-  function kanbanDragStart(e){
-    dragId = e.currentTarget.dataset.id;
-    e.currentTarget.classList.add("dragging");
-    e.dataTransfer.effectAllowed = "move";
-    try { e.dataTransfer.setData("text/plain", dragId); } catch(_){}
-  }
-  function kanbanDragEnd(e){
-    e.currentTarget.classList.remove("dragging");
-    dragId = null;
-  }
-  function kanbanDrop(list, e){
-    let id = dragId;
-    try{ const d = e?.dataTransfer?.getData("text/plain"); if(d) id=d; }catch(_){ }
-    if(!id) return;
-    const status = list.getAttribute("data-col");
-    const idx = tasks.findIndex(t=>String(t.ID)===String(id));
-    if(idx>=0){
-      tasks[idx].Статус = status;
-      tasks[idx].Обновлено = new Date().toISOString();
-      cloudSave(); drawKanban(); drawTable();
-    }
-  }
+        // DnD handlers
+        let dragId = null;
 
-  // ====== Comments ======
-  function getTaskById(id){ return tasks.find(x=>String(x.ID)===String(id)); }
+        function kanbanDragStart(e) {
+            dragId = e.currentTarget.dataset.id;
+            e.currentTarget.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+            try {
+                e.dataTransfer.setData("text/plain", dragId);
+            } catch (_) {}
+        }
 
-  function ensureComments(task){
-    if(!task.Комментарии) task.Комментарии = [];
-    return task.Комментарии;
-  }
+        function kanbanDragEnd(e) {
+            e.currentTarget.classList.remove("dragging");
+            dragId = null;
+        }
 
-  function renderComments(id){
-    const task = getTaskById(id);
-    const list = document.getElementById("commentsList");
-    const cnt  = document.getElementById("cmCount");
-    if(!task){ list.innerHTML = '<div class="text-secondary">Задача не найдена</div>'; cnt.textContent='0'; return; }
-    const comments = ensureComments(task);
-    cnt.textContent = comments.length;
-    if(!comments.length){ list.innerHTML = '<div class="text-secondary">Пока нет комментариев</div>'; return; }
-    list.innerHTML = comments.map(c=>{
-      const init = (c.author||"?").trim().slice(0,2).toUpperCase() || "?";
-      const t = new Date(c.time||Date.now());
-      const when = isNaN(+t) ? "" : t.toLocaleString('ru-RU');
-      return `
+        function kanbanDrop(list, e) {
+            let id = dragId;
+            try {
+                const d = e?.dataTransfer?.getData("text/plain");
+                if (d) id = d;
+            } catch (_) {}
+            if (!id) return;
+            const status = list.getAttribute("data-col");
+            const idx = tasks.findIndex(t => String(t.ID) === String(id));
+            if (idx >= 0) {
+                const was = tasks[idx].Статус;
+                tasks[idx].Статус = status;
+                tasks[idx].Обновлено = new Date().toISOString();
+                cloudSave();
+                drawKanban();
+                drawTable();
+                if (status === "Готово" && was !== "Готово") {
+                    confettiBurst();
+                }
+            }
+        }
+
+        // --- Emojis for statuses ---
+        const STATUS_EMOJI = {
+            "Новая": "🆕",
+            "В работе": "🔧",
+            "Ожидает": "⏳",
+            "Готово": "✅",
+            "Отменена": "🛑"
+        };
+
+        // --- Simple confetti when a task is marked Done ---
+        function confettiBurst(x = window.innerWidth / 2, y = 80) {
+            const c = document.createElement('canvas');
+            c.width = window.innerWidth;
+            c.height = window.innerHeight;
+            c.style.cssText = 'position:fixed;left:0;top:0;pointer-events:none;z-index:9999';
+            document.body.appendChild(c);
+            const ctx = c.getContext('2d');
+            const particles = Array.from({
+                length: 140
+            }).map(() => ({
+                x,
+                y,
+                vx: (Math.random() * 4 - 2),
+                vy: (Math.random() * -6 - 2),
+                g: 0.15,
+                life: 60 + Math.random() * 30,
+                size: 2 + Math.random() * 4,
+                color: ['#7a42ff', '#e21171', '#f47524', '#2dd4bf', '#ffdd57'][Math.floor(Math.random() * 5)]
+            }));
+            let frame = 0;
+            const tick = () => {
+                ctx.clearRect(0, 0, c.width, c.height);
+                particles.forEach(p => {
+                    p.vy += p.g;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+                frame++;
+                if (frame < 120) {
+                    requestAnimationFrame(tick);
+                } else {
+                    document.body.removeChild(c);
+                }
+            };
+            tick();
+        };
+
+        // ====== Comments ======
+        function getTaskById(id) {
+            return tasks.find(x => String(x.ID) === String(id));
+        }
+
+        function ensureComments(task) {
+            if (!task.Комментарии) task.Комментарии = [];
+            return task.Комментарии;
+        }
+
+        function renderComments(id) {
+            const task = getTaskById(id);
+            const list = document.getElementById("commentsList");
+            const cnt = document.getElementById("cmCount");
+            if (!task) {
+                list.innerHTML = '<div class="text-secondary">Задача не найдена</div>';
+                cnt.textContent = '0';
+                return;
+            }
+            const comments = ensureComments(task);
+            cnt.textContent = comments.length;
+            if (!comments.length) {
+                list.innerHTML = '<div class="text-secondary">Пока нет комментариев</div>';
+                return;
+            }
+            list.innerHTML = comments.map(c => {
+                const init = (c.author || "?").trim().slice(0, 2).toUpperCase() || "?";
+                const t = new Date(c.time || Date.now());
+                const when = isNaN(+t) ? "" : t.toLocaleString('ru-RU');
+                return `
         <div class="list-group list-group-flush mb-2">
           <div class="list-group-item">
             <div class="row align-items-center">
@@ -486,197 +1299,607 @@ function drawTable(){
             <div class="mt-2">${escapeHtml(c.text||'')}</div>
           </div>
         </div>`;
-    }).join("");
+            }).join("");
 
-    // attach delete listeners
-    list.querySelectorAll("[data-del-cm]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const cid = btn.getAttribute("data-del-cm");
-        const t = getTaskById(id); if(!t) return;
-        t.Комментарии = (t.Комментарии||[]).filter(x=>String(x.id)!==String(cid));
-        t.Обновлено = new Date().toISOString();
-        cloudSave(); renderComments(id);
-      });
-    });
-  }
+            // attach delete listeners
+            list.querySelectorAll("[data-del-cm]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const cid = btn.getAttribute("data-del-cm");
+                    const t = getTaskById(id);
+                    if (!t) return;
+                    t.Комментарии = (t.Комментарии || []).filter(x => String(x.id) !== String(cid));
+                    t.Обновлено = new Date().toISOString();
+                    cloudSave();
+                    renderComments(id);
+                });
+            });
+        }
 
-  function addCommentToTask(id, author, text){
-    const t = getTaskById(id); if(!t) return;
-    const cm = ensureComments(t);
-    const newItem = { id: (cm.length? Math.max(...cm.map(x=>Number(x.id)||0))+1 : 1), author: (author||'').trim() || '', text: (text||'').trim(), time: new Date().toISOString() };
-    if(!newItem.text) return alert("Введите текст комментария");
-    cm.push(newItem);
-    t.Обновлено = new Date().toISOString();
-    cloudSave(); renderComments(id);
-  }
+        function addCommentToTask(id, author, text) {
+            const t = getTaskById(id);
+            if (!t) return;
+            const cm = ensureComments(t);
+            const newItem = {
+                id: (cm.length ? Math.max(...cm.map(x => Number(x.id) || 0)) + 1 : 1),
+                author: (author || '').trim() || '',
+                text: (text || '').trim(),
+                time: new Date().toISOString()
+            };
+            if (!newItem.text) return alert("Введите текст комментария");
+            cm.push(newItem);
+            t.Обновлено = new Date().toISOString();
+            cloudSave();
+            renderComments(id);
+        }
 
-  // ====== Modal ======
-  function openModal(id=null){
-    editingId = id;
-    $("#modalTitle").textContent = id ? "Задача #"+id : "Новая задача";
-    $("#fmStatus").innerHTML = STATUS_CHOICES.map(s=>`<option>${s}</option>`).join("");
-    $("#fmPrio").innerHTML = PRIORITY_CHOICES.map(s=>`<option>${s}</option>`).join("");
-    $("#btnDelete").style.display = id ? "" : "none";
+        // ====== Modal ======
+        function openModal(id = null) {
+            editingId = id;
+            $("#modalTitle").textContent = id ? "Задача #" + id : "Новая задача";
+            $("#fmStatus").innerHTML = STATUS_CHOICES.map(s => `<option>${s}</option>`).join("");
+            $("#fmPrio").innerHTML = PRIORITY_CHOICES.map(s => `<option>${s}</option>`).join("");
+            $("#btnDelete").style.display = id ? "" : "none";
 
-    $("#fmTitle").value=""; $("#fmAssignee").value=""; $("#fmDue").value=""; $("#fmTags").value=""; $("#fmDesc").value="";
-    if(id){
-      const t = tasks.find(x=>x.ID===id); if(!t) return;
-      $("#fmTitle").value = t.Название||"";
-      $("#fmAssignee").value = t.Ответственный||"";
-      $("#fmStatus").value = t.Статус||"Новая";
-      $("#fmPrio").value = t.Приоритет||"Средний";
-      $("#fmDue").value = t.Дедлайн ? isoToYMD(t.Дедлайн) : "";
-      $("#fmTags").value = t.Теги||"";
-      $("#fmDesc").value = t.Описание||"";
-    }
-    document.getElementById("fmCommentAuthor").value = $("#fmAssignee").value || "";
-    renderComments(id ?? editingId);
+            $("#fmTitle").value = "";
+            $("#fmAssignee").value = "";
+            $("#fmDue").value = "";
+            $("#fmTags").value = "";
+            $("#fmDesc").value = "";
+            if (id) {
+                const t = tasks.find(x => x.ID === id);
+                if (!t) return;
+                $("#fmTitle").value = t.Название || "";
+                $("#fmAssignee").value = t.Ответственный || "";
+                $("#fmStatus").value = t.Статус || "Новая";
+                $("#fmPrio").value = t.Приоритет || "Средний";
+                $("#fmDue").value = t.Дедлайн ? isoToYMD(t.Дедлайн) : "";
+                $("#fmTags").value = t.Теги || "";
+                $("#fmDesc").value = t.Описание || "";
+            }
+            document.getElementById("fmCommentAuthor").value = $("#fmAssignee").value || "";
+            renderComments(id ?? editingId);
 
-    if (window.bootstrap?.Modal) {
-      const modal = new bootstrap.Modal(document.getElementById("modalEdit"));
-      modal.show();
-    } else {
-      alert("Bootstrap не загружен. Проверьте соединение.");
-    }
-  }
+            if (window.bootstrap?.Modal) {
+                const modal = new bootstrap.Modal(document.getElementById("modalEdit"));
+                modal.show();
+            } else {
+                alert("Bootstrap не загружен. Проверьте соединение.");
+            }
+        }
 
-  document.getElementById("btnSave").addEventListener("click", ()=>{
-    const now = new Date().toISOString();
-    const payload = {
-      ID: editingId ?? nextId(),
-      Название: $("#fmTitle").value.trim(),
-      Описание: $("#fmDesc").value.trim(),
-      Статус: $("#fmStatus").value,
-      Приоритет: $("#fmPrio").value,
-      Ответственный: $("#fmAssignee").value.trim(),
-      Дедлайн: $("#fmDue").value ? (new Date($("#fmDue").value+"T12:00:00Z").toISOString()) : null,
-      Теги: $("#fmTags").value.trim(),
-      Обновлено: now
-    };
-    if(!payload.Название){ alert("Введите название"); return; }
+        document.getElementById("btnSave").addEventListener("click", () => {
+            const now = new Date().toISOString();
+            const payload = {
+                ID: editingId ?? nextId(),
+                Название: $("#fmTitle").value.trim(),
+                Описание: $("#fmDesc").value.trim(),
+                Статус: $("#fmStatus").value,
+                Приоритет: $("#fmPrio").value,
+                Ответственный: $("#fmAssignee").value.trim(),
+                Дедлайн: $("#fmDue").value ? (new Date($("#fmDue").value + "T12:00:00Z").toISOString()) : null,
+                Теги: $("#fmTags").value.trim(),
+                Обновлено: now
+            };
+            if (!payload.Название) {
+                alert("Введите название");
+                return;
+            }
 
-    if(editingId){
-      const i = tasks.findIndex(x=>x.ID===editingId);
-      if(i>=0){ tasks[i] = {...tasks[i], ...payload}; }
-    }else{
-      tasks.push({...payload, Создано: now });
-    }
-    cloudSave(); drawTable(); drawKanban();
-    const inst = bootstrap.Modal.getInstance(document.getElementById("modalEdit"));
-    if (inst) inst.hide();
-  });
+            if (editingId) {
+                const i = tasks.findIndex(x => x.ID === editingId);
+                if (i >= 0) {
+                    tasks[i] = {
+                        ...tasks[i],
+                        ...payload
+                    };
+                }
+            } else {
+                tasks.push({
+                    ...payload,
+                    Создано: now
+                });
+            }
+            cloudSave();
+            drawTable();
+            drawKanban();
+            const inst = bootstrap.Modal.getInstance(document.getElementById("modalEdit"));
+            if (inst) inst.hide();
+        });
 
-  
-  // Comment add + shortcuts
-  document.getElementById("btnAddComment").addEventListener("click", ()=>{
-    addCommentToTask(editingId, document.getElementById("fmCommentAuthor").value, document.getElementById("fmCommentText").value);
-    document.getElementById("fmCommentText").value="";
-  });
-  document.getElementById("fmCommentText").addEventListener("keydown", (e)=>{
-    if(e.key==='Enter' && (e.ctrlKey || e.metaKey)){
-      e.preventDefault();
-      document.getElementById("btnAddComment").click();
-    }
-  });
-document.getElementById("btnDelete").addEventListener("click", ()=>{
-    if(editingId && confirm("Удалить задачу?")){
-      tasks = tasks.filter(x=>x.ID!==editingId);
-      cloudSave(); drawTable(); drawKanban();
-      const inst = bootstrap.Modal.getInstance(document.getElementById("modalEdit"));
-      if (inst) inst.hide();
-    }
-  });
 
-  // ====== Import/Export ======
-  document.getElementById("btnImportExcel").addEventListener("click", ()=>$("#fileExcel").click());
-  document.getElementById("btnImportCSV").addEventListener("click", ()=>$("#fileCSV").click());
+        // Comment add + shortcuts
+        document.getElementById("btnAddComment").addEventListener("click", () => {
+            addCommentToTask(editingId, document.getElementById("fmCommentAuthor").value, document.getElementById("fmCommentText").value);
+            document.getElementById("fmCommentText").value = "";
+        });
+        document.getElementById("fmCommentText").addEventListener("keydown", (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                document.getElementById("btnAddComment").click();
+            }
+        });
+        document.getElementById("btnDelete").addEventListener("click", () => {
+            if (editingId && confirm("Удалить задачу?")) {
+                tasks = tasks.filter(x => x.ID !== editingId);
+                cloudSave();
+                drawTable();
+                drawKanban();
+                const inst = bootstrap.Modal.getInstance(document.getElementById("modalEdit"));
+                if (inst) inst.hide();
+            }
+        });
 
-  document.getElementById("btnExportExcel").addEventListener("click", ()=>{
-    const out = tasks.map(toRowExport);
-    const ws = XLSX.utils.json_to_sheet(out); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Задачи");
-    XLSX.writeFile(wb,"Задачи.xlsx");
-  });
+        // ====== Import/Export ======
+        document.getElementById("btnImportExcel").addEventListener("click", () => $("#fileExcel").click());
+        document.getElementById("btnImportCSV").addEventListener("click", () => $("#fileCSV").click());
 
-  document.getElementById("btnExportCSV").addEventListener("click", ()=>{
-    const out = tasks.map(toRowExport);
-    const ws = XLSX.utils.json_to_sheet(out); const csv = XLSX.utils.sheet_to_csv(ws);
-    const a = document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download="Задачи.csv"; a.click();
-  });
+        document.getElementById("btnExportExcel").addEventListener("click", () => {
+            const out = tasks.map(toRowExport);
+            const ws = XLSX.utils.json_to_sheet(out);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Задачи");
+            XLSX.writeFile(wb, "Задачи.xlsx");
+        });
 
-  document.getElementById("fileExcel").addEventListener("change", async (e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    try{
-      const buf=await f.arrayBuffer(); const wb=XLSX.read(buf,{type:"array"}); const sh=wb.Sheets[wb.SheetNames[0]];
-      const json=XLSX.utils.sheet_to_json(sh,{defval:""});
-      tasks = json.map(fromRowImport); drawTable(); drawKanban(); cloudSave();
-    }catch(err){ alert("Не удалось импортировать Excel: "+err.message); }
-    e.target.value="";
-  });
+        document.getElementById("btnExportCSV").addEventListener("click", () => {
+            const out = tasks.map(toRowExport);
+            const ws = XLSX.utils.json_to_sheet(out);
+            const csv = XLSX.utils.sheet_to_csv(ws);
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([csv], {
+                type: "text/csv;charset=utf-8"
+            }));
+            a.download = "Задачи.csv";
+            a.click();
+        });
 
-  document.getElementById("fileCSV").addEventListener("change", async (e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    try{
-      const txt = await f.text();
-      const wb = XLSX.read(txt,{type:"string", raw:true});
-      const sh = wb.Sheets[wb.SheetNames[0]];
-      const json=XLSX.utils.sheet_to_json(sh,{defval:""});
-      tasks = json.map(fromRowImport); drawTable(); drawKanban(); cloudSave();
-    }catch(err){ alert("Не удалось импортировать CSV: "+err.message); }
-    e.target.value="";
-  });
+        document.getElementById("fileExcel").addEventListener("change", async (e) => {
+            const f = e.target.files[0];
+            if (!f) return;
+            try {
+                const buf = await f.arrayBuffer();
+                const wb = XLSX.read(buf, {
+                    type: "array"
+                });
+                const sh = wb.Sheets[wb.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sh, {
+                    defval: ""
+                });
+                tasks = json.map(fromRowImport);
+                drawTable();
+                drawKanban();
+                cloudSave();
+            } catch (err) {
+                alert("Не удалось импортировать Excel: " + err.message);
+            }
+            e.target.value = "";
+        });
 
-  function toRowExport(t){
-    return {
-      ID:t.ID, Название:t.Название, Описание:t.Описание, Статус:t.Статус, Приоритет:t.Приоритет,
-      Ответственный:t.Ответственный, Дедлайн: t.Дедлайн? isoToYMD(t.Дедлайн):"", Теги:t.Теги||"",
-      Создано: t.Создано? isoToYMD(t.Создано):"", Обновлено: t.Обновлено? isoToYMD(t.Обновлено):""
-    };
-  }
+        document.getElementById("fileCSV").addEventListener("change", async (e) => {
+            const f = e.target.files[0];
+            if (!f) return;
+            try {
+                const txt = await f.text();
+                const wb = XLSX.read(txt, {
+                    type: "string",
+                    raw: true
+                });
+                const sh = wb.Sheets[wb.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sh, {
+                    defval: ""
+                });
+                tasks = json.map(fromRowImport);
+                drawTable();
+                drawKanban();
+                cloudSave();
+            } catch (err) {
+                alert("Не удалось импортировать CSV: " + err.message);
+            }
+            e.target.value = "";
+        });
 
-  function fromRowImport(r){
-    return {
-      ID: Number(r.ID)||nextId(),
-      Название: r.Название||r.title||"",
-      Описание: r.Описание||r.desc||"",
-      Статус: r.Статус||r.status||"Новая",
-      Приоритет: r.Приоритет||r.priority||"Средний",
-      Ответственный: r.Ответственный||r.assignee||"",
-      Дедлайн: (r.Дедлайн||r.due)? new Date((r.Дедлайн||r.due)+"T12:00:00Z").toISOString(): null,
-      Теги: r.Теги||r.tags||"",
-      Создано: new Date().toISOString(),
-      Обновлено: new Date().toISOString()
-    };
-  }
+        function toRowExport(t) {
+            return {
+                ID: t.ID,
+                Название: t.Название,
+                Описание: t.Описание,
+                Статус: t.Статус,
+                Приоритет: t.Приоритет,
+                Ответственный: t.Ответственный,
+                Дедлайн: t.Дедлайн ? isoToYMD(t.Дедлайн) : "",
+                Теги: t.Теги || "",
+                Создано: t.Создано ? isoToYMD(t.Создано) : "",
+                Обновлено: t.Обновлено ? isoToYMD(t.Обновлено) : ""
+            };
+        }
 
-  // ====== Local & utils ======
-  document.getElementById("btnSaveLocal").addEventListener("click", ()=>{ localStorage.setItem("tm_tasks", JSON.stringify(tasks)); });
-  document.getElementById("btnLoadLocal").addEventListener("click", ()=>{ const raw=localStorage.getItem("tm_tasks"); if(raw){ tasks=JSON.parse(raw); drawTable(); drawKanban(); }});
-  document.getElementById("btnClearAll").addEventListener("click", ()=>{ if(confirm("Очистить все?")){ tasks=[]; drawTable(); drawKanban(); cloudSave(); }});
 
-  // Simple programmatic tabs (in case data-bs-toggle fails inside navbar)
-  function activateTab(targetId){
-    document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active","show"));
-    document.querySelectorAll(".navbar .nav-link").forEach(a=>a.classList.remove("active"));
-    const pane = document.querySelector(targetId);
-    if(pane){ pane.classList.add("active","show"); }
-    const link = document.querySelector(`.navbar .nav-link[href="${targetId}"]`);
-    if(link){ link.classList.add("active"); }
-  }
-  document.getElementById("link-table").addEventListener("click", (e)=>{ e.preventDefault(); activateTab("#tab-table"); });
-  document.getElementById("link-kanban").addEventListener("click", (e)=>{ e.preventDefault(); activateTab("#tab-kanban"); });
+        function fromRowImport(r) {
+            const createdRaw = r.Создано || r.created || r['Дата создания'] || r['Created'] || r['created_at'];
+            const dueRaw = r.Дедлайн || r.due || r['Дедлайн'] || r['Due'] || r['due date'] || r['Дата дедлайна'];
+            const createdISO = parseDateFlex(createdRaw) || new Date().toISOString();
+            const dueISO = parseDateFlex(dueRaw);
+            return {
+                ID: Number(r.ID) || nextId(),
+                Название: r.Название || r.title || r['Title'] || '',
+                Описание: r.Описание || r.desc || r['Description'] || '',
+                Статус: r.Статус || r.status || r['Status'] || 'Новая',
+                Приоритет: r.Приоритет || r.priority || r['Priority'] || 'Средний',
+                Ответственный: r.Ответственный || r.assignee || r['Assignee'] || '',
+                Дедлайн: dueISO,
+                Теги: r.Теги || r.tags || r['Tags'] || '',
+                Создано: createdISO,
+                Обновлено: new Date().toISOString()
+            };
+        }
 
-  function nextId(){ const ids=tasks.map(x=>Number(x.ID)||0); const m = ids.length?Math.max(...ids):0; return m+1; }
-  function isoToYMD(iso){ if(!iso) return ""; const d=new Date(iso); if(isNaN(+d)) return ""; return d.toISOString().slice(0,10); }
-  function escapeHtml(s){ return String(s||"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
-  // ====== Init ======
-  document.getElementById("btnAdd").addEventListener("click", ()=>openModal(null));
-  fillFilters();
-  (async function init(){
-    try{ const raw=localStorage.getItem("tm_tasks"); if(raw){ tasks=JSON.parse(raw);} }catch{}
-    drawTable(); drawKanban();
-    await cloudLoad();
-  })();
-  </script>
+        // ====== Local & utils ======
+        document.getElementById("btnSaveLocal").addEventListener("click", () => {
+            localStorage.setItem("tm_tasks", JSON.stringify(tasks));
+        });
+        document.getElementById("btnLoadLocal").addEventListener("click", () => {
+            const raw = localStorage.getItem("tm_tasks");
+            if (raw) {
+                tasks = JSON.parse(raw);
+                drawTable();
+                drawKanban();
+            }
+        }); // Simple programmatic tabs (in case data-bs-toggle fails inside navbar)
+        function activateTab(targetId) {
+            document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active", "show"));
+            document.querySelectorAll(".navbar .nav-link").forEach(a => a.classList.remove("active"));
+            const pane = document.querySelector(targetId);
+            if (pane) {
+                pane.classList.add("active", "show");
+            }
+            const link = document.querySelector(`.navbar .nav-link[href="${targetId}"]`);
+            if (link) {
+                link.classList.add("active");
+            }
+        }
+        document.getElementById("link-table").addEventListener("click", (e) => {
+            e.preventDefault();
+            activateTab("#tab-table");
+        });
+        document.getElementById("link-kanban").addEventListener("click", (e) => {
+            e.preventDefault();
+            activateTab("#tab-kanban");
+        });
+
+
+        // --- Robust date parser for imports (ISO, DD.MM.YYYY, DD/MM/YYYY, YYYY-MM-DD, Excel serial) ---
+        function parseDateFlex(v) {
+            if (v === undefined || v === null || v === "") return null;
+            // Already Date
+            if (Object.prototype.toString.call(v) === "[object Date]") {
+                if (!isNaN(v.getTime())) {
+                    const d = v;
+                    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12)).toISOString();
+                }
+                return null;
+            }
+            // Excel serial (days since 1899-12-30)
+            if (typeof v === "number" && isFinite(v)) {
+                const epoch = Math.round((v - 25569) * 86400 * 1000);
+                const d = new Date(epoch);
+                if (!isNaN(d)) return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12)).toISOString();
+                return null;
+            }
+            if (typeof v === "string") {
+                let s = v.trim();
+                if (!s) return null;
+                // strip time part if present (e.g. 06.09.2025 12:00)
+                s = s.replace(/[ T].*$/, "");
+                // DD.MM.YYYY or DD/MM/YYYY or DD-MM-YYYY
+                let m = s.match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{2,4})$/);
+                if (m) {
+                    let day = parseInt(m[1], 10),
+                        mon = parseInt(m[2], 10) - 1,
+                        yr = parseInt(m[3], 10);
+                    if (yr < 100) yr += 2000;
+                    const d = new Date(Date.UTC(yr, mon, day, 12));
+                    if (!isNaN(+d)) return d.toISOString();
+                }
+                // YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD
+                m = s.match(/^(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})$/);
+                if (m) {
+                    const yr = parseInt(m[1], 10),
+                        mon = parseInt(m[2], 10) - 1,
+                        day = parseInt(m[3], 10);
+                    const d = new Date(Date.UTC(yr, mon, day, 12));
+                    if (!isNaN(+d)) return d.toISOString();
+                }
+                // Fallback to native Date
+                const d = new Date(s);
+                if (!isNaN(+d)) {
+                    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12)).toISOString();
+                }
+            }
+            return null;
+        }
+
+        function nextId() {
+            const ids = tasks.map(x => Number(x.ID) || 0);
+            const m = ids.length ? Math.max(...ids) : 0;
+            return m + 1;
+        }
+
+        function isoToYMD(iso) {
+            if (!iso) return "";
+            const d = new Date(iso);
+            if (isNaN(+d)) return "";
+            return d.toISOString().slice(0, 10);
+        }
+
+        function escapeHtml(s) {
+            return String(s || "").replace(/[&<>"]/g, c => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;"
+            } [c]));
+        }
+
+
+        // ====== Theme Toggle ======
+        const rootEl = document.documentElement;
+
+        function applyTheme(theme) {
+            rootEl.setAttribute("data-theme", theme);
+            localStorage.setItem("tm_theme", theme);
+        }
+
+        function toggleTheme() {
+            const cur = rootEl.getAttribute("data-theme");
+            const next = (cur === "dark-fun" ? "light-fun" : "dark-fun");
+            applyTheme(next);
+            // keep Bootstrap's theme in sync so компонентные стили не тускнеют
+            document.documentElement.setAttribute("data-bs-theme", next === "light-fun" ? "light" : "dark");
+        }
+        (function initTheme() {
+            const stored = localStorage.getItem("tm_theme") || "dark-fun";
+            applyTheme(stored);
+            document.documentElement.setAttribute("data-bs-theme", stored === "light-fun" ? "light" : "dark");
+        })();
+        document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
+
+        // ====== Progress ======
+        function updateProgress() {
+            const total = tasks.length || 0;
+            const done = tasks.filter(t => t.Статус === "Готово").length;
+            const pct = total ? Math.round(done / total * 100) : 0;
+            document.querySelector('#progressBar span').style.width = pct + '%';
+            document.getElementById('progressPct').textContent = pct + '%';
+        }
+
+        // Patch existing drawTable/drawKanban hooks to update progress after draw
+        const _drawTable = drawTable;
+        drawTable = function() {
+            _drawTable();
+            updateProgress();
+            updateMascotBadge();
+        };
+        const _drawKanban = drawKanban;
+        drawKanban = function() {
+            _drawKanban();
+            updateProgress();
+            attachSelectable();
+            updateMascotBadge();
+        };
+
+        // ====== Selectable cards + Hotkeys ======
+        let selectedId = null;
+
+        function attachSelectable() {
+            document.querySelectorAll('#kanban .list-group-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    document.querySelectorAll('#kanban .list-group-item.selected').forEach(x => x.classList.remove('selected'));
+                    el.classList.add('selected');
+                    selectedId = el.dataset.id;
+                });
+            });
+        }
+
+        function setStatus(id, status) {
+            const i = tasks.findIndex(t => String(t.ID) === String(id));
+            if (i < 0) return;
+            tasks[i].Статус = status;
+            tasks[i].Обновлено = new Date().toISOString();
+            cloudSave();
+            drawKanban();
+            drawTable();
+        }
+
+        function setPrio(id, pr) {
+            const i = tasks.findIndex(t => String(t.ID) === String(id));
+            if (i < 0) return;
+            tasks[i].Приоритет = pr;
+            tasks[i].Обновлено = new Date().toISOString();
+            cloudSave();
+            drawKanban();
+            drawTable();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const tag = (e.target?.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || e.target?.isContentEditable) return; // don't hijack typing
+            if (!selectedId) return;
+            if (e.key.toLowerCase() === 'g') {
+                setStatus(selectedId, 'Готово');
+            }
+            if (e.key.toLowerCase() === 'w') {
+                setStatus(selectedId, 'Ожидает');
+            }
+            if (e.key === '1') {
+                setPrio(selectedId, 'Низкий');
+            }
+            if (e.key === '2') {
+                setPrio(selectedId, 'Средний');
+            }
+            if (e.key === '3') {
+                setPrio(selectedId, 'Высокий');
+            }
+            if (e.key === '4') {
+                setPrio(selectedId, 'Критично');
+            }
+        });
+
+        // ====== Mascot reacts on cloudSave ======
+        (function addMascot() {
+            const m = document.createElement('div');
+            m.id = 'mascot';
+            m.title = 'Срочные задачи';
+            m.textContent = '🤖';
+            const bubble = document.createElement('div');
+            bubble.className = 'badge-bubble';
+            bubble.textContent = '0';
+            m.appendChild(bubble);
+            m.addEventListener('click', (e) => {
+                if (e.shiftKey) {
+                    cloudSave();
+                    m.classList.add('wiggle');
+                    setTimeout(() => m.classList.remove('wiggle'), 800);
+                } else {
+                    renderUrgentModal();
+                }
+            });
+            document.body.appendChild(m);
+            updateMascotBadge();
+        })();
+
+        const _cloudSave = cloudSave;
+        cloudSave = async function() {
+            await _cloudSave();
+            const m = document.getElementById('mascot');
+            if (m) {
+                m.classList.add('wiggle');
+                setTimeout(() => m.classList.remove('wiggle'), 800);
+            }
+        };
+
+        // ====== Urgent (priority/due) ======
+        const PRIO_WEIGHT = {
+            "Критично": 3,
+            "Высокий": 2,
+            "Средний": 1,
+            "Низкий": 0
+        };
+        const DUE_SOON_DAYS = 3;
+
+        function daysLeft(iso) {
+            if (!iso) return null;
+            const end = new Date(iso);
+            if (isNaN(+end)) return null;
+            // consider end of the day local
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            const e = new Date(end);
+            e.setHours(23, 59, 59, 999);
+            return Math.floor((e - d) / (24 * 3600 * 1000));
+        }
+
+        function urgentFilter(t) {
+            if (t.Статус === "Готово" || t.Статус === "Отменена") return false;
+            const prio = PRIO_WEIGHT[t.Приоритет || "Низкий"] || 0;
+            const dl = daysLeft(t.Дедлайн);
+            return prio >= 2 || (dl !== null && dl <= DUE_SOON_DAYS);
+        }
+
+        function urgentRank(a, b) {
+            // overdue first
+            const da = daysLeft(a.Дедлайн),
+                db = daysLeft(b.Дедлайн);
+            const oa = (da !== null && da < 0) ? 1 : 0,
+                ob = (db !== null && db < 0) ? 1 : 0;
+            if (oa !== ob) return ob - oa;
+            // earlier deadline first
+            if (da !== null || db !== null) {
+                if (da === null) return 1;
+                if (db === null) return -1;
+                if (da !== db) return da - db;
+            }
+            // higher priority first
+            const pa = PRIO_WEIGHT[a.Приоритет || "Низкий"] || 0,
+                pb = PRIO_WEIGHT[b.Приоритет || "Низкий"] || 0;
+            if (pa !== pb) return pb - pa;
+            return (a.ID || 0) - (b.ID || 0);
+        }
+
+        function humanDue(iso) {
+            const d = daysLeft(iso);
+            if (d === null) return "без срока";
+            if (d < 0) return "просрочено";
+            if (d === 0) return "сегодня";
+            if (d === 1) return "завтра";
+            return `через ${d} дн.`;
+        }
+
+        function renderUrgentModal() {
+            const list = document.getElementById("urgentList");
+            const empty = document.getElementById("urgentEmpty");
+            const items = tasks.filter(urgentFilter).sort(urgentRank);
+            list.innerHTML = "";
+            if (!items.length) {
+                empty.style.display = "";
+                return;
+            }
+            empty.style.display = "none";
+            items.forEach(t => {
+                const row = document.createElement("div");
+                row.className = "list-group-item";
+                row.innerHTML = `
+        <div class="row align-items-center g-2">
+          <div class="col">
+            <div class="strong text-primary cursor-pointer" data-open>${escapeHtml(t.Название||"Без названия")}</div>
+            <div class="text-secondary small">${initials(t.Ответственный)} <span class="ms-1">${escapeHtml(t.Ответственный||"")}</span></div>
+          </div>
+          <div class="col-auto">${prioChip(t.Приоритет)}</div>
+          <div class="col-auto"><span class="deadline-chip">${humanDue(t.Дедлайн)}</span></div>
+          <div class="col-auto"><button class="btn btn-sm btn-outline" data-status><i class="ti ti-check"></i></button></div>
+        </div>`;
+                row.querySelector("[data-open]").addEventListener("click", () => openModal(t.ID));
+                row.querySelector("[data-status]").addEventListener("click", () => {
+                    setStatus(t.ID, "Готово");
+                });
+                list.appendChild(row);
+            });
+
+            if (window.bootstrap?.Modal) {
+                const modal = new bootstrap.Modal(document.getElementById("modalUrgent"));
+                modal.show();
+            }
+        }
+
+        function urgentCount() {
+            return tasks.filter(urgentFilter).length;
+        }
+
+        function updateMascotBadge() {
+            const m = document.getElementById("mascot");
+            if (!m) return;
+            const n = urgentCount();
+            const b = m.querySelector(".badge-bubble");
+            b.textContent = String(n);
+            if (n > 0) m.classList.add("has-urgent");
+            else m.classList.remove("has-urgent");
+        }
+
+        // ====== Init ======
+        document.getElementById("btnAdd").addEventListener("click", () => openModal(null));
+        fillFilters();
+        (async function init() {
+            try {
+                const raw = localStorage.getItem("tm_tasks");
+                if (raw) {
+                    tasks = JSON.parse(raw);
+                }
+            } catch {}
+            drawTable();
+            drawKanban();
+            await cloudLoad();
+        })();
+    </script>
 </body>
+
 </html>
