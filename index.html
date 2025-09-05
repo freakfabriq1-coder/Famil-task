@@ -541,10 +541,10 @@ document.getElementById("btnLoadLocal").addEventListener("click", ()=>{ const ra
 document.getElementById("btnClearAll").addEventListener("click", ()=>{ if(confirm("Очистить все задачи?")){ tasks=[]; drawRows(); saveLocalSilent(); scheduleCloudSave(); }});
 
 /* ====== Cloud sync (CORS-first, JSONP fallback; attachments stripped) ====== */
-let CLOUD_URL = "https://script.google.com/macros/s/AKfycbwHjDjNSxfiQs4z4bVtSyZ7O6QDxMF95I8GzADQx-vLPwnBTZrPBHeCzJbqKtFg0gze/exec";
+let CLOUD_URL = "https://script.google.com/macros/s/AKfycbyq_1gmzUt40zMTvk5SqzAQxMuocwz9ApOXTyuJk-fFKCjAYbBn5KzKMmc0goTwxfw4/exec";
 let CLOUD_PROFILE = "default";
-let CLOUD_MODE = "cors"; // or 'jsonp'
-let saveTimer = null;
+let CLOUD_MODE = "jsonp"; // делаем JSONP по умолчанию
+
 
 function setOnlineBadge(state){
   const el=$("#onlineBadge");
