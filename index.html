@@ -3,182 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Task Manager (HTML) — Pro</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
-// ===== JSON Import/Export =====
-document.getElementById("btnImportJSON").addEventListener("click", ()=>document.getElementById("fileJSON").click());
-document.getElementById("fileJSON").addEventListener("change", async (e)=>{
-  const f=e.target.files[0]; if(!f) return;
-  try{
-    const text = await f.text();
-    const obj = JSON.parse(text);
-    if(!Array.isArray(obj)) throw new Error("Формат: ожидается массив задач");
-    tasks = obj;
-    drawRows(); saveLocalSilent();
-    alert("Импортировано задач: "+tasks.length);
-  }catch(err){ alert("Ошибка импорта JSON: "+err.message); }
-  finally{ e.target.value=""; }
-});
-document.getElementById("btnExportJSON").addEventListener("click", ()=>{
-  const blob = new Blob([JSON.stringify(tasks, null, 2)], {type:"application/json"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="tasks.tm.json"; document.body.appendChild(a); a.click(); a.remove();
-});
-
-// ===== Cloud (Google Sheets via Apps Script) =====
-const modalCloud = document.getElementById("modalCloud");
-document.getElementById("btnCloud").addEventListener("click", ()=>{ 
-  // preload settings
-  document.getElementById("cloudUrl").value = localStorage.getItem("tm_cloud_url") || "";
-  document.getElementById("cloudKey").value = localStorage.getItem("tm_cloud_key") || "";
-  document.getElementById("cloudProfile").value = localStorage.getItem("tm_cloud_profile") || "default";
-  modalCloud.classList.add("open"); 
-});
-document.getElementById("btnCloseCloud").addEventListener("click", ()=>modalCloud.classList.remove("open"));
-
-document.getElementById("btnCloudLoad").addEventListener("click", async ()=>{
-  const url = document.getElementById("cloudUrl").value.trim();
-  const key = document.getElementById("cloudKey").value.trim();
-  const profile = document.getElementById("cloudProfile").value.trim() || "default";
-  if(!url){ alert("Укажите URL вашего Apps Script веб‑приложения"); return; }
-  localStorage.setItem("tm_cloud_url", url);
-  localStorage.setItem("tm_cloud_key", key);
-  localStorage.setItem("tm_cloud_profile", profile);
-  try{
-    const resp = await fetch(`${url}?action=get&profile=${encodeURIComponent(profile)}&key=${encodeURIComponent(key)}`, {method:"GET"});
-    if(!resp.ok){ throw new Error("HTTP "+resp.status); }
-    const data = await resp.json();
-    if(!Array.isArray(data.tasks)){ throw new Error("Неверный ответ сервера"); }
-    tasks = data.tasks;
-    drawRows(); saveLocalSilent();
-    alert("Загружено задач: "+tasks.length);
-  }catch(err){ alert("Ошибка загрузки: "+err.message); }
-});
-
-document.getElementById("btnCloudSave").addEventListener("click", async ()=>{
-  const url = document.getElementById("cloudUrl").value.trim();
-  const key = document.getElementById("cloudKey").value.trim();
-  const profile = document.getElementById("cloudProfile").value.trim() || "default";
-  if(!url){ alert("https://script.google.com/macros/s/AKfycbz5PEpi_68fNyXGJUXiIj-5-dLdEfdH1MJ2huATJudYLJC9Wkm6fG_b-HOVVWaScM3d/exec"); return; }
-  localStorage.setItem("tm_cloud_url", url);
-  localStorage.setItem("tm_cloud_key", key);
-  localStorage.setItem("tm_cloud_profile", profile);
-  try{
-    const resp = await fetch(`${url}?action=save&profile=${encodeURIComponent(profile)}&key=${encodeURIComponent(key)}`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ tasks })
-    });
-    if(!resp.ok){ throw new Error("HTTP "+resp.status); }
-    alert("Сохранено в облако.");
-  }catch(err){ alert("Ошибка сохранения: "+err.message); }
-});
-
-
-// ===== URL params & Cloud Autosync =====
-function b64urlDecode(str){
-  try{
-    str = str.replace(/-/g,'+').replace(/_/g,'/');
-    const pad = str.length % 4; if (pad) str += '='.repeat(4-pad);
-    return decodeURIComponent(escape(atob(str)));
-  }catch(e){ return ""; }
-}
-function getQP(name){
-  const u = new URL(location.href);
-  return u.searchParams.get(name);
-}
-
-let CLOUD_URL = null;
-let CLOUD_KEY = null;
-let CLOUD_PROFILE = null;
-let autosyncEnabled = false;
-let saveTimer = null;
-
-function setOnlineBadge(state){
-  const el = document.getElementById("onlineBadge");
-  if(!el) return;
-  if(state){
-    el.textContent = `ONLINE${CLOUD_PROFILE?` · ${CLOUD_PROFILE}`:""}`;
-    el.style.background = "#0b3a22";
-    el.style.color = "#b9f6ca";
-    el.style.borderColor = "#155e38";
-  }else{
-    el.textContent = "OFFLINE";
-    el.style.background = "#3a1a1a";
-    el.style.color = "#fecaca";
-    el.style.borderColor = "#7f1d1d";
-  }
-}
-
-async function cloudLoad(){
-  if(!CLOUD_URL) return;
-  try{
-    const resp = await fetch(`${CLOUD_URL}?action=get&profile=${encodeURIComponent(CLOUD_PROFILE||"default")}&key=${encodeURIComponent(CLOUD_KEY||"")}`);
-    if(!resp.ok) throw new Error("HTTP "+resp.status);
-    const data = await resp.json();
-    if(Array.isArray(data.tasks)){
-      tasks = data.tasks;
-      drawRows(); saveLocalSilent(); setOnlineBadge(true);
-    }
-  }catch(e){
-    console.warn("cloudLoad error:", e); setOnlineBadge(false);
-  }
-}
-async function cloudSave(){
-  if(!CLOUD_URL) return;
-  try{
-    const resp = await fetch(`${CLOUD_URL}?action=save&profile=${encodeURIComponent(CLOUD_PROFILE||"default")}&key=${encodeURIComponent(CLOUD_KEY||"")}`, {
-      method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({tasks})
-    });
-    if(!resp.ok) throw new Error("HTTP "+resp.status);
-    setOnlineBadge(true);
-  }catch(e){
-    console.warn("cloudSave error:", e); setOnlineBadge(false);
-  }
-}
-function scheduleCloudSave(){
-  if(!autosyncEnabled) return;
-  if(saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(cloudSave, 800); // debounce 0.8s
-}
-
-// Hook all mutations to schedule save
-const origDrawRows = drawRows;
-drawRows = function(){
-  origDrawRows();
-  scheduleCloudSave();
-}
-
-// Patch inline changes to schedule save
-const origSaveLocal = saveLocalSilent;
-saveLocalSilent = function(){
-  try{ localStorage.setItem("tm_tasks", JSON.stringify(tasks)); }catch(e){}
-  scheduleCloudSave();
-}
-
-// Parse URL params
-(function(){
-  const cloudParam = getQP("cloud"); // base64url-encoded Apps Script URL
-  const profileParam = getQP("profile") || getQP("doc") || getQP("id");
-  const keyParam = getQP("key") || getQP("token");
-  if(cloudParam){
-    const decoded = b64urlDecode(cloudParam);
-    if(decoded && /^https?:\/\/script\.google\.com\/macros\//.test(decoded)){
-      CLOUD_URL = decoded;
-      CLOUD_PROFILE = profileParam || "default";
-      CLOUD_KEY = keyParam || "";
-      autosyncEnabled = true;
-      setOnlineBadge(true);
-      // Auto-load from cloud on init
-      cloudLoad();
-    }else{
-      console.warn("cloud param not valid");
-    }
-  } else {
-    setOnlineBadge(false);
-  }
-})();
-
-</script>
+<title>Task Manager — Cloud Pro</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#0d0e12; --panel:#131521; --card:#171a29;
@@ -221,7 +48,6 @@ tr:hover td{background:#14182a}
 .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:#232844;color:#cbd5e1}
 .row-actions{display:flex;gap:6px;flex-wrap:wrap}
 .tag{display:inline-block;padding:2px 8px;font-size:12px;border-radius:999px;background:#21305a;color:#c7d2fe;border:1px solid #26376b;margin:2px 4px 0 0}
-.kbd{border:1px solid var(--border);background:#0e1220;padding:2px 6px;border-radius:6px;color:var(--muted);font-size:12px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:10000}
 .modal.open{display:flex}
 .modal-card{width:min(860px,96vw);background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);z-index:10001}
@@ -239,6 +65,11 @@ footer{margin:18px 0;color:var(--muted);font-size:12px;text-align:center}
 .link{color:#c7aefc;text-decoration:none;border-bottom:1px dashed #7f5cff}
 .link:hover{color:white;border-color:white}
 select.inline{background:#11152a;border-color:#2b3152}
+
+/* toast */
+.toast{position:fixed;right:16px;bottom:16px;background:#131521;color:#e9ecf5;border:1px solid var(--border);
+  padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.2s}
+.toast.show{opacity:1;transform:none}
 </style>
 </head>
 <body>
@@ -247,11 +78,12 @@ select.inline{background:#11152a;border-color:#2b3152}
       <div class="brand">
         <div class="logo"></div>
         <div>
-          <div class="title">Task Manager — HTML Pro</div>
-          <div class="subtitle">Импорт/Экспорт Excel/CSV · Фильтры · Инлайн-правка статуса/приоритета · Вложения</div>
+          <div class="title">Task Manager — Cloud Pro</div>
+          <div class="subtitle">Импорт/Экспорт · Фильтры · Инлайн-правка · Вложения · Облако</div>
         </div>
       </div>
-      <div class="toolbar"><span id="onlineBadge" class="badge">OFFLINE</span>
+      <div class="toolbar">
+        <span id="onlineBadge" class="badge">OFFLINE</span>
         <button class="btn" id="btnImportExcel">Импорт Excel</button>
         <button class="btn" id="btnImportCSV">Импорт CSV</button>
         <button class="btn btn-gold" id="btnExportExcel">Экспорт Excel</button>
@@ -259,10 +91,8 @@ select.inline{background:#11152a;border-color:#2b3152}
         <button class="btn btn-primary" id="btnSaveLocal">Сохранить в браузере</button>
         <button class="btn" id="btnLoadLocal">Загрузить из браузера</button>
         <button class="btn btn-danger" id="btnClearAll">Очистить всё</button>
-        <button class="btn" id="btnImportJSON">Импорт JSON</button>
-        <button class="btn btn-gold" id="btnExportJSON">Экспорт JSON</button>
-        <button class="btn" id="btnCloud">Облако (Google Sheets)</button>
         <button class="btn btn-primary" id="btnAdd">+ Добавить задачу</button>
+        <button class="btn" id="btnCloud">Облако</button>
       </div>
     </div>
 
@@ -292,14 +122,44 @@ select.inline{background:#11152a;border-color:#2b3152}
       </div>
     </div>
 
-    <footer>Сделано с любовью к порядку • Для Excel-импорта нужен интернет (SheetJS CDN).</footer>
+    <footer>Cloud sync: GitHub Pages ⇄ Google Apps Script. Вложения в облако не отправляются (ограничение Google).</footer>
   </div>
 
-  <input type="file" id="fileExcel" accept=".xlsx,.xls" style="display:none" />
-  <input type="file" id="fileCSV" accept=".csv" style="display:none" />
-  <input type="file" id="fileJSON" accept=".json" style="display:none" />
+  <!-- Cloud Modal -->
+  <div class="modal" id="modalCloud">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Настройки облака</h3>
+        <button class="btn btn-ghost" id="btnCloseCloud">✕</button>
+      </div>
+      <div class="modal-grid">
+        <div style="grid-column:1/-1">
+          <label>URL вашего Apps Script (оканчивается на /exec)</label>
+          <input class="input" id="cloudUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+        </div>
+        <div>
+          <label>Профиль</label>
+          <input class="input" id="cloudProfile" placeholder="default" />
+        </div>
+        <div>
+          <label>Режим загрузки</label>
+          <select id="cloudMode">
+            <option value="cors">CORS (обычный)</option>
+            <option value="jsonp">JSONP (если CORS блокируется)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <div class="hint">Совет: если видите OFFLINE — попробуйте режим JSONP.</div>
+        <div>
+          <button class="btn" id="btnCloudLoad">Загрузить</button>
+          <button class="btn btn-primary" id="btnCloudSave">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <!-- Modal -->
+  <!-- Edit Modal -->
   <div class="modal" id="modal">
     <div class="modal-card">
       <div class="modal-head">
@@ -337,7 +197,7 @@ select.inline{background:#11152a;border-color:#2b3152}
         </div>
         <div style="grid-column:1/-1">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
-            <label style="margin:0">Вложения</label>
+            <label style="margin:0">Вложения (не синхронизируются в облако)</label>
             <input type="file" id="fmFiles" multiple />
           </div>
           <div class="files" id="filesList"></div>
@@ -346,14 +206,17 @@ select.inline{background:#11152a;border-color:#2b3152}
       <div class="modal-actions">
         <div><button class="btn" id="btnDelete" style="display:none">Удалить задачу</button></div>
         <div>
-          <button class="btn" id="btnDownloadAll" title="Скачать все вложения .zip (просто по одному)">Скачать вложения</button>
+          <button class="btn" id="btnDownloadAll" title="Скачать все вложения">Скачать вложения</button>
           <button class="btn btn-primary" id="btnSave">Сохранить</button>
         </div>
       </div>
     </div>
   </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+/* ====== Data & helpers ====== */
 const STATUS_CHOICES = ["Новая","В работе","Ожидает","Готово","Отменена"];
 const PRIORITY_CHOICES = ["Низкий","Средний","Высокий","Критично"];
 const HEADER_ORDER = ["ID","Название","Статус","Приоритет","Ответственный","Дедлайн","Теги","Описание","Создано","Обновлено","Действия"];
@@ -363,6 +226,7 @@ let sortState = {key:"Дедлайн", dir:"asc"};
 let editingId = null;
 
 const $ = s => document.querySelector(s);
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 1800); }
 
 function toISODate(d){ if(!d) return null; const dt = (d instanceof Date)?d:new Date(d); return isNaN(+dt)?null:dt.toISOString(); }
 function fromISOToYMD(iso){ if(!iso) return ""; const d=new Date(iso); if(isNaN(+d)) return ""; return d.toISOString().slice(0,10); }
@@ -443,24 +307,20 @@ function drawRows(){
     }
 
     addCell("ID", escapeHtml(t.ID??""));
-
-    // Название (клик по строке откроет детали)
     addCell("Название", escapeHtml(t.Название||""));
 
-    // Статус — inline select
     const tdStatus = document.createElement("td");
     const selS = document.createElement("select");
     selS.className="inline"; STATUS_CHOICES.forEach(s=>{ const o=document.createElement("option"); o.textContent=s; o.selected=(t.Статус===s); selS.appendChild(o); });
     selS.addEventListener("click", e=>e.stopPropagation());
-    selS.addEventListener("change", ()=>{ t.Статус = selS.value; t.Обновлено = toISODate(new Date()); saveLocalSilent(); });
+    selS.addEventListener("change", ()=>{ t.Статус = selS.value; t.Обновлено = toISODate(new Date()); saveLocalSilent(); scheduleCloudSave(); });
     tdStatus.appendChild(selS); tr.appendChild(tdStatus);
 
-    // Приоритет — inline select
     const tdPr = document.createElement("td");
     const selP = document.createElement("select");
     selP.className="inline"; PRIORITY_CHOICES.forEach(p=>{ const o=document.createElement("option"); o.textContent=p; o.selected=(t.Приоритет===p); selP.appendChild(o); });
     selP.addEventListener("click", e=>e.stopPropagation());
-    selP.addEventListener("change", ()=>{ t.Приоритет = selP.value; t.Обновлено = toISODate(new Date()); saveLocalSilent(); });
+    selP.addEventListener("change", ()=>{ t.Приоритет = selP.value; t.Обновлено = toISODate(new Date()); saveLocalSilent(); scheduleCloudSave(); });
     tdPr.appendChild(selP); tr.appendChild(tdPr);
 
     addCell("Ответственный", escapeHtml(t.Ответственный||""));
@@ -474,18 +334,15 @@ function drawRows(){
     const btnEdit=document.createElement("button"); btnEdit.className="btn"; btnEdit.textContent="Редактировать";
     btnEdit.addEventListener("click",(e)=>{ e.stopPropagation(); openModal(t.ID); });
     const btnDel=document.createElement("button"); btnDel.className="btn btn-danger"; btnDel.textContent="Удалить";
-    btnDel.addEventListener("click",(e)=>{ e.stopPropagation(); if(confirm("Удалить задачу ID="+t.ID+"?")){ tasks=tasks.filter(x=>x.ID!==t.ID); drawRows(); }});
+    btnDel.addEventListener("click",(e)=>{ e.stopPropagation(); if(confirm("Удалить задачу ID="+t.ID+"?")){ tasks=tasks.filter(x=>x.ID!==t.ID); drawRows(); scheduleCloudSave(); saveLocalSilent(); }});
     tdAct.append(btnEdit,btnDel); tr.appendChild(tdAct);
 
-    // Клик по строке — открыть подробности
     tr.addEventListener("click", ()=>openModal(t.ID));
-
     tbody.appendChild(tr);
   });
 }
 
-function nextId(){ const ids=tasks.map(t=>Number(t.ID)||0); const m=ids.length?Math.max(...ids):0; return (isFinite(m)?m:0)+1; }
-
+/* ====== Modal & attachments (local only) ====== */
 function openModal(id=null){
   editingId = id;
   $("#modalTitle").textContent = id ? `Задача #${id}` : "Новая задача";
@@ -532,43 +389,28 @@ function renderFiles(task){
     wrap.appendChild(card);
   });
 }
-
 $("#fmFiles").addEventListener("change", async (e)=>{
   const files=[...e.target.files]; if(!files.length) return;
-  const t = tasks.find(x=>x.ID===editingId);
-  if(!t && editingId){ return; }
-  // собираем список как dataURL
+  if(!editingId){ toast("Сначала сохраните задачу, потом добавляйте вложения."); return; }
+  const t = tasks.find(x=>x.ID===editingId); if(!t) return;
   for(const f of files){
     const dataUrl = await fileToDataURL(f);
-    if(editingId){ // к существующей задаче
-      t.attachments = t.attachments || [];
-      t.attachments.push({name:f.name, type:f.type, size:f.size, dataUrl});
-    }else{ // к новой — временно в DOM, сохраним при save()
-      tempNewFiles.push({name:f.name, type:f.type, size:f.size, dataUrl});
-    }
+    t.attachments = t.attachments || [];
+    t.attachments.push({name:f.name, type:f.type, size:f.size, dataUrl});
   }
-  if(editingId){ renderFiles(t); saveLocalSilent(); }
+  renderFiles(t); saveLocalSilent();
 });
-
 function fileToDataURL(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file);
-  });
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
 }
-
-let tempNewFiles = [];
-
 $("#btnDownloadAll").addEventListener("click", ()=>{
   const t = tasks.find(x=>x.ID===editingId);
   if(!t || !(t.attachments||[]).length){ alert("Нет вложений"); return; }
-  // Без zip-библиотеки — просто откроем каждое во вкладке/скачивании
-  (t.attachments||[]).forEach(f=>{
-    const a=document.createElement("a"); a.href=f.dataUrl; a.download=f.name; document.body.appendChild(a); a.click(); a.remove();
-  });
+  (t.attachments||[]).forEach(f=>{ const a=document.createElement("a"); a.href=f.dataUrl; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); });
 });
 
 $("#btnDelete").addEventListener("click", ()=>{
-  if(editingId && confirm("Удалить задачу?")){ tasks=tasks.filter(x=>x.ID!==editingId); closeModal(); drawRows(); }
+  if(editingId && confirm("Удалить задачу?")){ tasks=tasks.filter(x=>x.ID!==editingId); closeModal(); drawRows(); saveLocalSilent(); scheduleCloudSave(); }
 });
 
 $("#btnSave").addEventListener("click", ()=>{
@@ -589,19 +431,17 @@ $("#btnSave").addEventListener("click", ()=>{
 
   if(editingId){
     const i=tasks.findIndex(x=>x.ID===editingId);
-    if(i>=0){
-      tasks[i] = {...tasks[i], ...payload, Обновлено: nowIso};
-    }
+    if(i>=0){ tasks[i] = {...tasks[i], ...payload, Обновлено: nowIso}; }
   }else{
     const newTask = {...payload, Создано: nowIso, Обновлено: nowIso};
-    if(tempNewFiles.length){ newTask.attachments = tempNewFiles.slice(); }
     tasks.push(newTask);
   }
-  tempNewFiles = [];
-  drawRows(); closeModal(); saveLocalSilent();
+  drawRows(); closeModal(); saveLocalSilent(); scheduleCloudSave();
 });
 
-// Import/Export Excel/CSV & LocalStorage – same as before
+function nextId(){ const ids=tasks.map(t=>Number(t.ID)||0); const m=ids.length?Math.max(...ids):0; return (isFinite(m)?m:0)+1; }
+
+/* ====== Import / Export / Local ====== */
 const COLUMN_ALIASES = {
   id:["id","ид","код","№","номер","task id","идентификатор","ID"],
   title:["название","тема","задача","title","name","subject","Название"],
@@ -643,8 +483,26 @@ function toTaskObject(row,map){
     attachments: [] };
 }
 
-$("#btnImportExcel").addEventListener("click", ()=>$("#fileExcel").click());
-$("#fileExcel").addEventListener("change", async (e)=>{
+document.getElementById("btnAdd").addEventListener("click", ()=>openModal(null));
+
+document.getElementById("btnImportExcel").addEventListener("click", ()=>document.getElementById("fileExcel").click());
+document.getElementById("btnExportExcel").addEventListener("click", ()=>{
+  const out=tasks.map(t=>({"ID":t.ID,"Название":t.Название,"Описание":t.Описание,"Статус":t.Статус,"Приоритет":t.Приоритет,"Ответственный":t.Ответственный,"Дедлайн":t.Дедлайн?fromISOToYMD(t.Дедлайн):"","Теги":t.Теги,"Создано":t.Создано?fromISOToYMD(t.Создано):"","Обновлено":t.Обновлено?fromISOToYMD(t.Обновлено):""}));
+  const ws=XLSX.utils.json_to_sheet(out); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Задачи"); XLSX.writeFile(wb,"Задачи_export.xlsx");
+});
+document.getElementById("btnImportCSV").addEventListener("click", ()=>document.getElementById("fileCSV").click());
+document.getElementById("btnExportCSV").addEventListener("click", ()=>{
+  const headers=["ID","Название","Описание","Статус","Приоритет","Ответственный","Дедлайн","Теги","Создано","Обновлено"];
+  const rows=tasks.map(t=>[t.ID,t.Название,t.Описание,t.Статус,t.Приоритет,t.Ответственный,t.Дедлайн?fromISOToYMD(t.Дедлайн):"",t.Теги||"",t.Создано?fromISOToYMD(t.Создано):"",t.Обновлено?fromISOToYMD(t.Обновлено):""]);
+  const csv=rows.map(r=>r.map(v=>{ const s=String(v??""); return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }).join(",")).join("\r\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="Задачи_export.csv"; document.body.appendChild(a); a.click(); a.remove();
+});
+
+document.body.insertAdjacentHTML("beforeend", '<input type="file" id="fileExcel" accept=".xlsx,.xls" style="display:none" />');
+document.body.insertAdjacentHTML("beforeend", '<input type="file" id="fileCSV" accept=".csv" style="display:none" />');
+
+document.getElementById("fileExcel")?.addEventListener("change", async (e)=>{
   const file=e.target.files[0]; if(!file) return;
   try{
     const buf=await file.arrayBuffer();
@@ -654,269 +512,145 @@ $("#fileExcel").addEventListener("change", async (e)=>{
     const headers=Object.keys(json[0]); const {map}=normalizeHeaders(headers);
     const imported=json.map(row=>toTaskObject(row,map));
     let cur=nextId(); for(const t of imported){ if(!t.ID) t.ID=cur++; }
-    tasks=imported; drawRows(); alert("Импортировано задач: "+tasks.length);
+    tasks=imported; drawRows(); toast("Импортировано: "+tasks.length);
+    scheduleCloudSave(); saveLocalSilent();
   }catch(err){ console.error(err); alert("Ошибка импорта Excel: "+err.message); }
   finally{ e.target.value=""; }
 });
-
-$("#btnExportExcel").addEventListener("click", ()=>{
-  const out=tasks.map(t=>({"ID":t.ID,"Название":t.Название,"Описание":t.Описание,"Статус":t.Статус,"Приоритет":t.Приоритет,"Ответственный":t.Ответственный,"Дедлайн":t.Дедлайн?fromISOToYMD(t.Дедлайн):"","Теги":t.Теги,"Создано":t.Создано?fromISOToYMD(t.Создано):"","Обновлено":t.Обновлено?fromISOToYMD(t.Обновлено):""}));
-  const ws=XLSX.utils.json_to_sheet(out); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Задачи"); XLSX.writeFile(wb,"Задачи_export.xlsx");
-});
-
-$("#btnImportCSV").addEventListener("click", ()=>$("#fileCSV").click());
-$("#fileCSV").addEventListener("change", async (e)=>{
+document.getElementById("fileCSV")?.addEventListener("change", async (e)=>{
   const file=e.target.files[0]; if(!file) return;
   try{
-    const text=await file.text(); const rows=csvParse(text); if(!rows.length){ alert("CSV пуст"); return; }
+    const text=await file.text();
+    const rows=(function csvParse(txt){ const rs=[]; let r=[],cur="",inQ=false; for(let i=0;i<txt.length;i++){ const ch=txt[i];
+      if(ch=='"'){ if(inQ && txt[i+1]=='"'){ cur+='"'; i++; } else inQ=!inQ; } else if(ch==',' && !inQ){ r.push(cur); cur=""; }
+      else if((ch=='\n'||ch=='\r') && !inQ){ if(cur!==""||r.length){ r.push(cur); rs.push(r); r=[]; cur=""; } if(ch=='\r' && txt[i+1]=='\n') i++; }
+      else cur+=ch; } if(cur!==""||r.length){ r.push(cur); rs.push(r); } return rs; })(text);
+    if(!rows.length){ alert("CSV пуст"); return; }
     const headers=rows[0]; const body=rows.slice(1).map(r=>{const o={}; headers.forEach((h,i)=>o[h]=r[i]||""); return o;});
     const {map}=normalizeHeaders(headers); const imported=body.map(row=>toTaskObject(row,map));
     let cur=nextId(); for(const t of imported){ if(!t.ID) t.ID=cur++; }
-    tasks=imported; drawRows(); alert("Импортировано задач: "+tasks.length);
+    tasks=imported; drawRows(); toast("Импортировано: "+tasks.length);
+    scheduleCloudSave(); saveLocalSilent();
   }catch(err){ console.error(err); alert("Ошибка импорта CSV: "+err.message); }
   finally{ e.target.value=""; }
 });
-$("#btnExportCSV").addEventListener("click", ()=>{
-  const headers=["ID","Название","Описание","Статус","Приоритет","Ответственный","Дедлайн","Теги","Создано","Обновлено"];
-  const rows=tasks.map(t=>[t.ID,t.Название,t.Описание,t.Статус,t.Приоритет,t.Ответственный,t.Дедлайн?fromISOToYMD(t.Дедлайн):"",t.Теги||"",t.Создано?fromISOToYMD(t.Создано):"",t.Обновлено?fromISOToYMD(t.Обновлено):""]);
-  const csv=csvStringify([headers,...rows]); const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="Задачи_export.csv"; document.body.appendChild(a); a.click(); a.remove();
-});
-function csvParse(text){
-  const rows=[]; let row=[],cur="",inQ=false;
-  for(let i=0;i<text.length;i++){
-    const ch=text[i];
-    if(ch=='"'){ if(inQ && text[i+1]=='"'){ cur+='"'; i++; } else inQ=!inQ; }
-    else if(ch==',' && !inQ){ row.push(cur); cur=""; }
-    else if((ch=='\n'||ch=='\r') && !inQ){ if(cur!==""||row.length){ row.push(cur); rows.push(row); row=[]; cur=""; } if(ch=='\r' && text[i+1]=='\n') i++; }
-    else cur+=ch;
-  }
-  if(cur!==""||row.length){ row.push(cur); rows.push(row); }
-  return rows;
-}
-function csvStringify(rows){
-  return rows.map(r=>r.map(v=>{ const s=String(v??""); return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }).join(",")).join("\r\n");
-}
 
-// LocalStorage
 function saveLocalSilent(){ try{ localStorage.setItem("tm_tasks", JSON.stringify(tasks)); }catch(e){} }
-$("#btnSaveLocal").addEventListener("click", ()=>{ saveLocalSilent(); alert("Сохранено в браузере."); });
-$("#btnLoadLocal").addEventListener("click", ()=>{ const raw=localStorage.getItem("tm_tasks"); if(!raw) return alert("В браузере пусто."); try{ const arr=JSON.parse(raw); if(Array.isArray(arr)){ tasks=arr; drawRows(); alert("Загружено."); }}catch(e){ alert("Ошибка загрузки."); }});
-$("#btnClearAll").addEventListener("click", ()=>{ if(confirm("Очистить все задачи?")){ tasks=[]; drawRows(); saveLocalSilent(); }});
+document.getElementById("btnSaveLocal").addEventListener("click", ()=>{ saveLocalSilent(); toast("Сохранено в браузере"); });
+document.getElementById("btnLoadLocal").addEventListener("click", ()=>{ const raw=localStorage.getItem("tm_tasks"); if(!raw) return alert("В браузере пусто."); try{ const arr=JSON.parse(raw); if(Array.isArray(arr)){ tasks=arr; drawRows(); toast("Загружено из браузера"); }}catch(e){ alert("Ошибка загрузки."); }});
+document.getElementById("btnClearAll").addEventListener("click", ()=>{ if(confirm("Очистить все задачи?")){ tasks=[]; drawRows(); saveLocalSilent(); scheduleCloudSave(); }});
 
-document.getElementById("btnAdd").addEventListener("click", ()=>openModal(null));
+/* ====== Cloud sync (CORS-first, JSONP fallback; attachments stripped) ====== */
+let CLOUD_URL = "https://script.google.com/macros/s/AKfycbwHjDjNSxfiQs4z4bVtSyZ7O6QDxMF95I8GzADQx-vLPwnBTZrPBHeCzJbqKtFg0gze/exec";
+let CLOUD_PROFILE = "default";
+let CLOUD_MODE = "cors"; // or 'jsonp'
+let saveTimer = null;
+
+function setOnlineBadge(state){
+  const el=$("#onlineBadge");
+  if(state){ el.textContent=`ONLINE · ${CLOUD_PROFILE}`; el.style.background="#0b3a22"; el.style.color="#b9f6ca"; el.style.borderColor="#155e38"; }
+  else { el.textContent="OFFLINE"; el.style.background="#3a1a1a"; el.style.color="#fecaca"; el.style.borderColor="#7f1d1d"; }
+}
+
+function getQP(name){ const u=new URL(location.href); return u.searchParams.get(name); }
+(function parseParams(){
+  const cu=getQP("cloud"); const pr=getQP("profile"); const md=getQP("mode");
+  if(cu) CLOUD_URL=cu; if(pr) CLOUD_PROFILE=pr; if(md) CLOUD_MODE=md;
+})();
+
+function tasksForCloud(){
+  // Убираем вложения из облака (ограничение Google Script Properties ~500KB)
+  return tasks.map(t=>{ const {attachments, ...rest}=t; return rest; });
+}
+
+async function cloudLoad(){
+  try{
+    if(CLOUD_MODE==="jsonp"){
+      const data = await jsonp(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`);
+      if(data && Array.isArray(data.tasks)){ tasks = mergeCloud(data.tasks); drawRows(); setOnlineBadge(true); saveLocalSilent(); toast("Загружено из облака (JSONP)"); return; }
+      throw new Error("Неверный ответ JSONP");
+    }else{
+      const r = await fetch(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`, {method:"GET"});
+      const data = await r.json();
+      if(data && Array.isArray(data.tasks)){ tasks = mergeCloud(data.tasks); drawRows(); setOnlineBadge(true); saveLocalSilent(); toast("Загружено из облака"); return; }
+      throw new Error("Неверный ответ");
+    }
+  }catch(e){
+    console.warn("cloudLoad fail", e);
+    setOnlineBadge(false);
+  }
+}
+function mergeCloud(cloudTasks){
+  // Берём облачные, но если локально есть вложения по тем же ID — оставляем
+  const mapLocal = Object.fromEntries(tasks.map(t=>[t.ID, t.attachments]));
+  return cloudTasks.map(t=>({ ...t, attachments: mapLocal[t.ID]||[] }));
+}
+
+async function cloudSave(){
+  // Отправляем без вложений
+  const payload = { tasks: tasksForCloud() };
+  try{
+    if(CLOUD_MODE==="jsonp"){
+      // JSONP запись: GET с параметром write=1 (требует поддержки на сервере)
+      await jsonp(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}&write=1&data=${encodeURIComponent(JSON.stringify(payload.tasks))}`);
+      setOnlineBadge(true); toast("Сохранено в облако (JSONP)");
+    }else{
+      await fetch(`${CLOUD_URL}?profile=${encodeURIComponent(CLOUD_PROFILE)}`, {
+        method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload), mode:"no-cors"
+      });
+      setOnlineBadge(true); toast("Отправлено в облако");
+    }
+  }catch(e){
+    console.warn("cloudSave fail", e); setOnlineBadge(false);
+  }
+}
+function scheduleCloudSave(){ if(saveTimer) clearTimeout(saveTimer); saveTimer=setTimeout(cloudSave, 800); }
+
+// JSONP helper
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cb="cb_"+Math.random().toString(36).slice(2);
+    window[cb]=(data)=>{ resolve(data); cleanup(); };
+    function cleanup(){ delete window[cb]; script.remove(); timer&&clearTimeout(timer); }
+    const script=document.createElement("script");
+    script.src=url+(url.includes("?")?"&":"?")+"callback="+cb;
+    script.onerror=()=>{ reject(new Error("JSONP error")); cleanup(); };
+    document.body.appendChild(script);
+    const timer=setTimeout(()=>{ reject(new Error("JSONP timeout")); cleanup(); }, 8000);
+  });
+}
+
+// Cloud modal
+document.getElementById("btnCloud").addEventListener("click", ()=>{
+  $("#cloudUrl").value = CLOUD_URL;
+  $("#cloudProfile").value = CLOUD_PROFILE;
+  $("#cloudMode").value = CLOUD_MODE;
+  $("#modalCloud").classList.add("open");
+});
+document.getElementById("btnCloseCloud").addEventListener("click", ()=>$("#modalCloud").classList.remove("open"));
+document.getElementById("btnCloudLoad").addEventListener("click", async ()=>{
+  CLOUD_URL = $("#cloudUrl").value.trim() || CLOUD_URL;
+  CLOUD_PROFILE = $("#cloudProfile").value.trim() || "default";
+  CLOUD_MODE = $("#cloudMode").value;
+  $("#modalCloud").classList.remove("open");
+  await cloudLoad();
+});
+document.getElementById("btnCloudSave").addEventListener("click", async ()=>{
+  CLOUD_URL = $("#cloudUrl").value.trim() || CLOUD_URL;
+  CLOUD_PROFILE = $("#cloudProfile").value.trim() || "default";
+  CLOUD_MODE = $("#cloudMode").value;
+  $("#modalCloud").classList.remove("open");
+  await cloudSave();
+});
+
+/* ====== Init ====== */
 function init(){
   fillFilterOptions(); renderHeader();
   try{ const raw=localStorage.getItem("tm_tasks"); if(raw){ const arr=JSON.parse(raw); if(Array.isArray(arr)) tasks=arr; } }catch(e){}
   drawRows();
+  cloudLoad(); // try cloud
 }
 init();
-
-// ===== JSON Import/Export =====
-document.getElementById("btnImportJSON").addEventListener("click", ()=>document.getElementById("fileJSON").click());
-document.getElementById("fileJSON").addEventListener("change", async (e)=>{
-  const f=e.target.files[0]; if(!f) return;
-  try{
-    const text = await f.text();
-    const obj = JSON.parse(text);
-    if(!Array.isArray(obj)) throw new Error("Формат: ожидается массив задач");
-    tasks = obj;
-    drawRows(); saveLocalSilent();
-    alert("Импортировано задач: "+tasks.length);
-  }catch(err){ alert("Ошибка импорта JSON: "+err.message); }
-  finally{ e.target.value=""; }
-});
-document.getElementById("btnExportJSON").addEventListener("click", ()=>{
-  const blob = new Blob([JSON.stringify(tasks, null, 2)], {type:"application/json"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="tasks.tm.json"; document.body.appendChild(a); a.click(); a.remove();
-});
-
-// ===== Cloud (Google Sheets via Apps Script) =====
-const modalCloud = document.getElementById("modalCloud");
-document.getElementById("btnCloud").addEventListener("click", ()=>{ 
-  // preload settings
-  document.getElementById("cloudUrl").value = localStorage.getItem("tm_cloud_url") || "";
-  document.getElementById("cloudKey").value = localStorage.getItem("tm_cloud_key") || "";
-  document.getElementById("cloudProfile").value = localStorage.getItem("tm_cloud_profile") || "default";
-  modalCloud.classList.add("open"); 
-});
-document.getElementById("btnCloseCloud").addEventListener("click", ()=>modalCloud.classList.remove("open"));
-
-document.getElementById("btnCloudLoad").addEventListener("click", async ()=>{
-  const url = document.getElementById("cloudUrl").value.trim();
-  const key = document.getElementById("cloudKey").value.trim();
-  const profile = document.getElementById("cloudProfile").value.trim() || "default";
-  if(!url){ alert("Укажите URL вашего Apps Script веб‑приложения"); return; }
-  localStorage.setItem("tm_cloud_url", url);
-  localStorage.setItem("tm_cloud_key", key);
-  localStorage.setItem("tm_cloud_profile", profile);
-  try{
-    const resp = await fetch(`${url}?action=get&profile=${encodeURIComponent(profile)}&key=${encodeURIComponent(key)}`, {method:"GET"});
-    if(!resp.ok){ throw new Error("HTTP "+resp.status); }
-    const data = await resp.json();
-    if(!Array.isArray(data.tasks)){ throw new Error("Неверный ответ сервера"); }
-    tasks = data.tasks;
-    drawRows(); saveLocalSilent();
-    alert("Загружено задач: "+tasks.length);
-  }catch(err){ alert("Ошибка загрузки: "+err.message); }
-});
-
-document.getElementById("btnCloudSave").addEventListener("click", async ()=>{
-  const url = document.getElementById("cloudUrl").value.trim();
-  const key = document.getElementById("cloudKey").value.trim();
-  const profile = document.getElementById("cloudProfile").value.trim() || "default";
-  if(!url){ alert("Укажите URL вашего Apps Script веб‑приложения"); return; }
-  localStorage.setItem("tm_cloud_url", url);
-  localStorage.setItem("tm_cloud_key", key);
-  localStorage.setItem("tm_cloud_profile", profile);
-  try{
-    const resp = await fetch(`${url}?action=save&profile=${encodeURIComponent(profile)}&key=${encodeURIComponent(key)}`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ tasks })
-    });
-    if(!resp.ok){ throw new Error("HTTP "+resp.status); }
-    alert("Сохранено в облако.");
-  }catch(err){ alert("Ошибка сохранения: "+err.message); }
-});
-
-
-// ===== URL params & Cloud Autosync =====
-function b64urlDecode(str){
-  try{
-    str = str.replace(/-/g,'+').replace(/_/g,'/');
-    const pad = str.length % 4; if (pad) str += '='.repeat(4-pad);
-    return decodeURIComponent(escape(atob(str)));
-  }catch(e){ return ""; }
-}
-function getQP(name){
-  const u = new URL(location.href);
-  return u.searchParams.get(name);
-}
-
-let CLOUD_URL = null;
-let CLOUD_KEY = null;
-let CLOUD_PROFILE = null;
-let autosyncEnabled = false;
-let saveTimer = null;
-
-function setOnlineBadge(state){
-  const el = document.getElementById("onlineBadge");
-  if(!el) return;
-  if(state){
-    el.textContent = `ONLINE${CLOUD_PROFILE?` · ${CLOUD_PROFILE}`:""}`;
-    el.style.background = "#0b3a22";
-    el.style.color = "#b9f6ca";
-    el.style.borderColor = "#155e38";
-  }else{
-    el.textContent = "OFFLINE";
-    el.style.background = "#3a1a1a";
-    el.style.color = "#fecaca";
-    el.style.borderColor = "#7f1d1d";
-  }
-}
-
-async function cloudLoad(){
-  if(!CLOUD_URL) return;
-  try{
-    const resp = await fetch(`${CLOUD_URL}?action=get&profile=${encodeURIComponent(CLOUD_PROFILE||"default")}&key=${encodeURIComponent(CLOUD_KEY||"")}`);
-    if(!resp.ok) throw new Error("HTTP "+resp.status);
-    const data = await resp.json();
-    if(Array.isArray(data.tasks)){
-      tasks = data.tasks;
-      drawRows(); saveLocalSilent(); setOnlineBadge(true);
-    }
-  }catch(e){
-    console.warn("cloudLoad error:", e); setOnlineBadge(false);
-  }
-}
-async function cloudSave(){
-  if(!CLOUD_URL) return;
-  try{
-    const resp = await fetch(`${CLOUD_URL}?action=save&profile=${encodeURIComponent(CLOUD_PROFILE||"default")}&key=${encodeURIComponent(CLOUD_KEY||"")}`, {
-      method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({tasks})
-    });
-    if(!resp.ok) throw new Error("HTTP "+resp.status);
-    setOnlineBadge(true);
-  }catch(e){
-    console.warn("cloudSave error:", e); setOnlineBadge(false);
-  }
-}
-function scheduleCloudSave(){
-  if(!autosyncEnabled) return;
-  if(saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(cloudSave, 800); // debounce 0.8s
-}
-
-// Hook all mutations to schedule save
-const origDrawRows = drawRows;
-drawRows = function(){
-  origDrawRows();
-  scheduleCloudSave();
-}
-
-// Patch inline changes to schedule save
-const origSaveLocal = saveLocalSilent;
-saveLocalSilent = function(){
-  try{ localStorage.setItem("tm_tasks", JSON.stringify(tasks)); }catch(e){}
-  scheduleCloudSave();
-}
-
-// Parse URL params
-(function(){
-  const cloudParam = getQP("cloud"); // base64url-encoded Apps Script URL
-  const profileParam = getQP("profile") || getQP("doc") || getQP("id");
-  const keyParam = getQP("key") || getQP("token");
-  if(cloudParam){
-    const decoded = b64urlDecode(cloudParam);
-    if(decoded && /^https?:\/\/script\.google\.com\/macros\//.test(decoded)){
-      CLOUD_URL = decoded;
-      CLOUD_PROFILE = profileParam || "default";
-      CLOUD_KEY = keyParam || "";
-      autosyncEnabled = true;
-      setOnlineBadge(true);
-      // Auto-load from cloud on init
-      cloudLoad();
-    }else{
-      console.warn("cloud param not valid");
-    }
-  } else {
-    setOnlineBadge(false);
-  }
-})();
-
 </script>
-
-  <!-- Cloud Modal -->
-  <div class="modal" id="modalCloud">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3>Облако через Google Sheets (Apps Script)</h3>
-        <button class="btn btn-ghost" id="btnCloseCloud">✕</button>
-      </div>
-      <div class="modal-grid">
-        <div style="grid-column:1/-1">
-          <label>URL вашего веб-приложения (Apps Script)</label>
-          <input class="input" id="cloudUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
-        </div>
-        <div>
-          <label>Секретный ключ (необязательно)</label>
-          <input class="input" id="cloudKey" placeholder="например: my-secret" />
-        </div>
-        <div>
-          <label>Профиль (если хотите несколько наборов)</label>
-          <input class="input" id="cloudProfile" placeholder="default" />
-        </div>
-      </div>
-      <div class="modal-actions">
-        <div class="hint">Совет: этот HTML ничего никуда не отправляет без вашего явного клика.</div>
-        <div>
-          <button class="btn" id="btnCloudLoad">Загрузить из облака</button>
-          <button class="btn btn-primary" id="btnCloudSave">Сохранить в облако</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>
